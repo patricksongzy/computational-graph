@@ -58,7 +58,8 @@ public class Graph {
     }
 
     // a list of nodes in the graph
-    private final List<Node> nodes = new ArrayList<>();
+    private List<Node> nodes = new ArrayList<>();
+    private boolean isSorted = false;
 
     /**
      * Constructs a graph and adds it to the list of graphs.
@@ -75,6 +76,7 @@ public class Graph {
      */
     static void addNode(Node node) {
         current.nodes.add(node);
+        current.isSorted = false;
     }
 
     /**
@@ -92,19 +94,28 @@ public class Graph {
      * allow for the graph to be computed efficiently.
      *
      * @param placeholderMap the inputted placeholders
-     * @param nodes          the nodes to compute
+     * @param outputNodes    the nodes to compute
      */
     @SuppressWarnings("WeakerAccess")
-    public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... nodes) {
+    public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... outputNodes) {
         // if no nodes are computed, then return immediately
-		if (nodes.length == 0) {
-			return;
-		}
+        if (outputNodes.length == 0) {
+            return;
+        }
 
         // add placeholders to the results
         computePlaceholders(placeholderMap);
-        // sort the graph topologically, then based on distance to output nodes
-        Node[] sorted = current.sortGraph(nodes);
+
+        if (!current.isSorted) {
+            current.nodes = Arrays.asList(current.sortGraph());
+        }
+
+        Set<Node> discoverable = new HashSet<>();
+        for (Node outputNode : outputNodes) {
+            populateDiscoverable(outputNode, discoverable);
+        }
+
+        Node[] sorted = current.nodes.stream().filter(discoverable::contains).toArray(Node[]::new);
 
         try {
             for (Node node : sorted) {
@@ -135,10 +146,10 @@ public class Graph {
         if (placeholderMap != null) {
             for (Placeholder placeholder : placeholderMap.keySet()) {
                 // placeholders do not need to be added from other graphs
-				if (current.nodes.contains(placeholder)) {
-					Results.put(placeholder,
-						CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
-				}
+                if (current.nodes.contains(placeholder)) {
+                    Results.put(placeholder,
+                        CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
+                }
             }
         }
     }
@@ -172,9 +183,9 @@ public class Graph {
      */
     private static void populateDiscoverable(Node current, Set<Node> discoverable) {
         discoverable.addAll(Arrays.asList(current.children));
-		for (Node child : current.children) {
-			populateDiscoverable(child, discoverable);
-		}
+        for (Node child : current.children) {
+            populateDiscoverable(child, discoverable);
+        }
 
         discoverable.add(current);
     }
@@ -190,14 +201,14 @@ public class Graph {
      */
     private static void visit(Node node, Set<Node> discoverable, Deque<Node> sorted) {
         // check if the node has already been visited and added to the graph
-		if (sorted.contains(node)) {
-			return;
-		}
+        if (sorted.contains(node)) {
+            return;
+        }
 
         // if the node is not discoverable, the graph is not directed
-		if (!discoverable.contains(node)) {
-			throw new IllegalArgumentException("Unable to sort the graph. Graph is not directed.");
-		}
+        if (!discoverable.contains(node)) {
+            throw new IllegalArgumentException("Unable to sort the graph. Graph is not directed.");
+        }
 
         // remove the node from the discoverable nodes
         discoverable.remove(node);
@@ -229,16 +240,21 @@ public class Graph {
      * @param endNodes the end nodes
      * @return the sorted graph
      */
-    Node[] sortGraph(Node[] endNodes) {
+    Node[] sortGraph(Node... endNodes) {
         // the topologically sorted graph
         Deque<Node> topological = new ArrayDeque<>();
         // a set of nodes which may be discovered in the topological sort
         Set<Node> discoverable = new HashSet<>();
 
-        // populate the discoverable nodes based on only descendants of the end nodes, as the rest do not need to be computed
-		for (Node endNode : endNodes) {
-			populateDiscoverable(endNode, discoverable);
-		}
+        if (endNodes.length == 0) {
+            discoverable.addAll(current.nodes);
+            isSorted = true;
+        } else {
+            // populate the discoverable nodes based on only descendants of the end nodes, as the rest do not need to be computed
+            for (Node endNode : endNodes) {
+                populateDiscoverable(endNode, discoverable);
+            }
+        }
 
         // perform the topological sort until no more nodes are discoverable
         while (!discoverable.isEmpty()) {
