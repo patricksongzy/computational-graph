@@ -45,8 +45,7 @@ public class Placeholder extends Node {
      * @return the value which was passed in for this node, as a tensor
      * @see Results#get(Node)
      */
-    @Override
-    public Tensor computeOutput() {
+    @Override public Tensor computeOutput() {
         return Results.get(this);
     }
 }

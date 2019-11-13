@@ -67,17 +67,16 @@ public class Tensor {
         }
 
         // the broadcast dimensions is the max of each tensor dimension
-        int[] broadcastDimensions = new int[Arrays.stream(tensors).map(Tensor::getDimensions)
-            .mapToInt(arr -> arr.length).max().orElseThrow(IllegalArgumentException::new)];
+        int[] broadcastDimensions = new int[Arrays.stream(tensors).map(Tensor::getDimensions).mapToInt(arr -> arr.length).max()
+                .orElseThrow(IllegalArgumentException::new)];
         // the tensor dimensions, padded with ones, where broadcasting is necessary
         int[][] tensorDimensionsPadded = new int[tensors.length][broadcastDimensions.length];
 
         // loop through the tensors, and copy over the dimensions, leaving the rest as ones
         for (int i = 0; i < tensorDimensionsPadded.length; i++) {
             Arrays.fill(tensorDimensionsPadded[i], 1);
-            System.arraycopy(tensors[i].dimensions, 0, tensorDimensionsPadded[i],
-                broadcastDimensions.length - tensors[i].dimensions.length,
-                tensors[i].dimensions.length);
+            System.arraycopy(tensors[i].dimensions, 0, tensorDimensionsPadded[i], broadcastDimensions.length - tensors[i].dimensions.length,
+                    tensors[i].dimensions.length);
         }
 
         for (int i = 1; i <= broadcastDimensions.length; i++) {
@@ -96,10 +95,8 @@ public class Tensor {
                 int currentDimension = tensorDimensionsPadded[j][broadcastDimensions.length - i];
 
                 if (currentDimension != 1 && currentDimension != broadcastDimension) {
-                    throw new IllegalArgumentException(String.format(
-                        "Unable to broadcast tensors with dimensions '%s'. 1 != '%d' != '%d'.",
-                        Arrays.deepToString(tensorDimensionsPadded), currentDimension,
-                        broadcastDimension));
+                    throw new IllegalArgumentException(String.format("Unable to broadcast tensors with dimensions '%s'. 1 != '%d' != '%d'.",
+                            Arrays.deepToString(tensorDimensionsPadded), currentDimension, broadcastDimension));
                 }
             }
 
@@ -134,8 +131,7 @@ public class Tensor {
             for (int j = 0; j < tensors.length; j++) {
                 // get the values at the index
                 // if an index greater than 1 is being accessed on an array broadcast from a dimension of one, that single value is used
-                broadcast[j].values[i] = tensors[j]
-                    .getBroadcast(tensorDimensionsPadded[j], indices);
+                broadcast[j].values[i] = tensors[j].getBroadcast(tensorDimensionsPadded[j], indices);
             }
         }
 
@@ -154,8 +150,7 @@ public class Tensor {
         }
 
         // stream the tensors and map to the dimensions to check whether the
-        return Arrays.stream(tensors).map(Tensor::getDimensions)
-            .anyMatch(dim -> !Arrays.equals(dim, tensors[0].dimensions));
+        return Arrays.stream(tensors).map(Tensor::getDimensions).anyMatch(dim -> !Arrays.equals(dim, tensors[0].dimensions));
     }
 
     /**
@@ -175,15 +170,13 @@ public class Tensor {
      * @param obj the other tensor
      * @return whether the two tensors are equal
      */
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (!(obj instanceof Tensor)) {
             return false;
         }
 
         Tensor other = (Tensor) obj;
-        return Arrays.equals(this.dimensions, other.dimensions) && Arrays
-            .equals(this.values, other.values);
+        return Arrays.equals(this.dimensions, other.dimensions) && Arrays.equals(this.values, other.values);
     }
 
     /**
@@ -191,11 +184,9 @@ public class Tensor {
      *
      * @param values the values of the tensor.
      */
-    @SuppressWarnings("unused")
-    public void fill(float[] values) {
+    @SuppressWarnings("unused") public void fill(float[] values) {
         if (values.length != this.values.length) {
-            throw new IllegalArgumentException(
-                "The dimensions of the inputted values do not match those of the tensor.");
+            throw new IllegalArgumentException("The dimensions of the inputted values do not match those of the tensor.");
         }
 
         this.values = values;
@@ -207,8 +198,7 @@ public class Tensor {
      * @param indices the indices for the individual dimensions
      * @return the value at the given indices
      */
-    @SuppressWarnings("WeakerAccess")
-    public float get(int... indices) {
+    @SuppressWarnings("WeakerAccess") public float get(int... indices) {
         return values[getFlattenedIndex(indices)];
     }
 
@@ -237,8 +227,7 @@ public class Tensor {
         // calculate the flattened (absolute) index, however use the remainders of the broadcast indices and the dimensions
         // this ensures that any broadcast dimensions will have an index of 0, since division by does not result in a remainder
         for (int i = 1; i < dimensionsPadded.length; i++) {
-            flattenedIndex =
-                flattenedIndex * dimensionsPadded[i] + indices[i] % dimensionsPadded[i];
+            flattenedIndex = flattenedIndex * dimensionsPadded[i] + indices[i] % dimensionsPadded[i];
         }
 
         return values[flattenedIndex];
@@ -287,8 +276,7 @@ public class Tensor {
      *
      * @return the array of values of the tensor
      */
-    @SuppressWarnings("WeakerAccess")
-    public float[] getValues() {
+    @SuppressWarnings("WeakerAccess") public float[] getValues() {
         return values;
     }
 
@@ -298,12 +286,10 @@ public class Tensor {
      * @param value   the value to set
      * @param indices the indices for the individual dimensions
      */
-    @SuppressWarnings("WeakerAccess")
-    public void set(float value, int... indices) {
+    @SuppressWarnings("WeakerAccess") public void set(float value, int... indices) {
         if (indices.length != dimensions.length) {
-            throw new IllegalArgumentException(String
-                .format("Indices and dimensions do not match: '%d' != '%d'.", indices.length,
-                    dimensions.length));
+            throw new IllegalArgumentException(
+                    String.format("Indices and dimensions do not match: '%d' != '%d'.", indices.length, dimensions.length));
         }
 
         values[getFlattenedIndex(indices)] = value;
@@ -317,19 +303,16 @@ public class Tensor {
      */
     public void set(float value, int flattenedIndex) {
         if (flattenedIndex > length - 1) {
-            throw new IllegalArgumentException(String
-                .format("Index exceeds length of tensor: '%d' > '%d'", flattenedIndex, length - 1));
+            throw new IllegalArgumentException(String.format("Index exceeds length of tensor: '%d' > '%d'", flattenedIndex, length - 1));
         }
 
         values[flattenedIndex] = value;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         // print the shape of the tensor
         StringBuilder result = new StringBuilder(String.format("<Tensor: shape=(%s)>",
-            Arrays.stream(dimensions).mapToObj(String::valueOf)
-                .collect(Collectors.joining(" x "))));
+                Arrays.stream(dimensions).mapToObj(String::valueOf).collect(Collectors.joining(" x "))));
 
         // open the tensor using a bracket
         result.append("\n{");
@@ -464,9 +447,8 @@ public class Tensor {
          */
         public Builder setValues(float... values) {
             if (values.length != this.length) {
-                throw new IllegalArgumentException(String
-                    .format("Dimension lengths do not match: '%d', '%d'.", values.length,
-                        this.length));
+                throw new IllegalArgumentException(
+                        String.format("Dimension lengths do not match: '%d', '%d'.", values.length, this.length));
             }
 
             this.values = values;

@@ -24,12 +24,13 @@
 
 package neural.graph.node;
 
+import neural.graph.exception.NodeComputationException;
+import neural.math.Tensor;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import neural.graph.exception.NodeComputationException;
-import neural.math.Tensor;
 
 /**
  * The <code>Results</code> represents a map of the results of all computational graphs, stored by
@@ -43,19 +44,8 @@ public class Results {
     /**
      * Clears any stored results.
      */
-    @SuppressWarnings("unused")
-    public static void clear() {
+    @SuppressWarnings("unused") public static void clear() {
         results.clear();
-    }
-
-    /**
-     * Adds the output of a node, alongside with the respective ID to the results.
-     *
-     * @param node  the node whose output to store
-     * @param value the output of the node
-     */
-    static void put(Node node, Future<Tensor> value) {
-        results.put(node.getID(), value);
     }
 
     /**
@@ -67,10 +57,9 @@ public class Results {
      *                                  has not yet been computed
      */
     public static Tensor get(Node node) {
-		if (!results.containsKey(node.getID())) {
-			throw new IllegalArgumentException(
-				"Attempting to retrieve value which has not yet been computed.");
-		}
+        if (!results.containsKey(node.getID())) {
+            throw new IllegalArgumentException("Attempting to retrieve value which has not yet been computed.");
+        }
 
         try {
             return results.get(node.getID()).get();
@@ -86,8 +75,18 @@ public class Results {
      * @throws InterruptedException if any executions are interrupted
      */
     static void getAll() throws ExecutionException, InterruptedException {
-		for (Future<Tensor> future : results.values()) {
-			future.get();
-		}
+        for (Future<Tensor> future : results.values()) {
+            future.get();
+        }
+    }
+
+    /**
+     * Adds the output of a node, alongside with the respective ID to the results.
+     *
+     * @param node  the node whose output to store
+     * @param value the output of the node
+     */
+    static void put(Node node, Future<Tensor> value) {
+        results.put(node.getID(), value);
     }
 }

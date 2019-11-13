@@ -24,29 +24,21 @@
 
 package neural.graph.node;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import neural.graph.exception.NodeComputationException;
 import neural.graph.node.leaves.Placeholder;
 import neural.graph.node.operation.Operation;
 import neural.math.Tensor;
 
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Graph {
 
     // the executor service is used to execute operations efficiently
-    private static final ExecutorService es = Executors
-        .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     // a list of graphs which have been created
     private static final List<Graph> graphs = new ArrayList<>();
     // the current graph
@@ -64,8 +56,7 @@ public class Graph {
     /**
      * Constructs a graph and adds it to the list of graphs.
      */
-    @SuppressWarnings("WeakerAccess")
-    public Graph() {
+    @SuppressWarnings("WeakerAccess") public Graph() {
         graphs.add(this);
     }
 
@@ -82,8 +73,7 @@ public class Graph {
     /**
      * Clears all graphs of nodes and creates a new default graph.
      */
-    @SuppressWarnings("WeakerAccess")
-    public static void clearAll() {
+    @SuppressWarnings("WeakerAccess") public static void clearAll() {
         graphs.clear();
         current = new Graph();
     }
@@ -96,8 +86,7 @@ public class Graph {
      * @param placeholderMap the inputted placeholders
      * @param outputNodes    the nodes to compute
      */
-    @SuppressWarnings("WeakerAccess")
-    public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... outputNodes) {
+    @SuppressWarnings("WeakerAccess") public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... outputNodes) {
         // if no nodes are computed, then return immediately
         if (outputNodes.length == 0) {
             return;
@@ -147,8 +136,7 @@ public class Graph {
             for (Placeholder placeholder : placeholderMap.keySet()) {
                 // placeholders do not need to be added from other graphs
                 if (current.nodes.contains(placeholder)) {
-                    Results.put(placeholder,
-                        CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
+                    Results.put(placeholder, CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
                 }
             }
         }
@@ -159,8 +147,7 @@ public class Graph {
      *
      * @return the currently active graph
      */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    public static Graph getCurrent() {
+    @SuppressWarnings({"unused", "WeakerAccess"}) public static Graph getCurrent() {
         return current;
     }
 
@@ -169,8 +156,7 @@ public class Graph {
      *
      * @return the default graph
      */
-    @SuppressWarnings("unused")
-    public static Graph getDefault() {
+    @SuppressWarnings("unused") public static Graph getDefault() {
         return graphs.get(0);
     }
 
@@ -226,8 +212,7 @@ public class Graph {
      *
      * @return this graph
      */
-    @SuppressWarnings("WeakerAccess")
-    public Graph setCurrent() {
+    @SuppressWarnings("WeakerAccess") public Graph setCurrent() {
         current = this;
 
         return this;
@@ -265,12 +250,10 @@ public class Graph {
         Map<Node, Integer> distances = new HashMap<>();
         for (Node node : topological) {
             // because the graph is topologically sorted, the distance can be increased by traversing from end node to start
-            distances.put(node, node.getConsumers().stream()
-                .mapToInt(consumer -> distances.getOrDefault(consumer, 1) - 1).min().orElse(0));
+            distances.put(node, node.getConsumers().stream().mapToInt(consumer -> distances.getOrDefault(consumer, 1) - 1).min().orElse(0));
         }
 
         // return the nodes, sorted with the farthest nodes from the end first
-        return distances.entrySet().stream().sorted(Map.Entry.comparingByValue())
-            .map(Map.Entry::getKey).toArray(Node[]::new);
+        return distances.entrySet().stream().sorted(Map.Entry.comparingByValue()).map(Map.Entry::getKey).toArray(Node[]::new);
     }
 }

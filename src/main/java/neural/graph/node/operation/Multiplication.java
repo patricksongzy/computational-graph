@@ -43,12 +43,11 @@ public class Multiplication extends Operation {
      * @param inputs the inputs of this node, as tensors
      * @return the output of this node, as a tensor
      */
-    @Override
-    public Tensor computeOutput(Tensor[] inputs) {
+    @Override public Tensor computeOutput(Tensor[] inputs) {
         // check if the tensors require broadcasting, then broadcast if necessary
-		if (Tensor.isDimensionsMismatch(inputs)) {
-			inputs = Tensor.broadcast(inputs);
-		}
+        if (Tensor.isDimensionsMismatch(inputs)) {
+            inputs = Tensor.broadcast(inputs);
+        }
 
         // create an output tensor with the output dimensions
         Tensor result = Tensor.zeros(inputs[0].getDimensions());

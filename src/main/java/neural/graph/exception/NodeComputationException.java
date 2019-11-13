@@ -28,8 +28,7 @@ package neural.graph.exception;
  * A <code>NodeComputationException</code> is a <code>RuntimeException</code> which is thrown when
  * an error occurs during the computation of the graph.
  */
-@SuppressWarnings("unused")
-public class NodeComputationException extends RuntimeException {
+@SuppressWarnings("unused") public class NodeComputationException extends RuntimeException {
 
     public NodeComputationException() {
     }

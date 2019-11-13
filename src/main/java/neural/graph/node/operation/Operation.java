@@ -24,20 +24,18 @@
 
 package neural.graph.node.operation;
 
-import java.util.Arrays;
-import java.util.concurrent.Callable;
 import neural.graph.node.Node;
 import neural.graph.node.Results;
 import neural.math.Tensor;
 
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+
 /**
- * An <code>Operation</code> represents a node which applies an operation to one or more inputs.
- * <code>Operation</code> implements
- * <code>Callable</code>, as their results must be accessed as a <code>Future</code> list when
- * called by an <code>ExecutorService</code>
- * to ensure that consumers have the required values to proceed before running. The
- * <code>Operation</code> node must also implement a differentiation method, which calculates its
- * derivative.
+ * An <code>Operation</code> represents a node which applies an operation to one or more inputs. <code>Operation</code> implements
+ * <code>Callable</code>, as their results must be accessed as a <code>Future</code> list when called by an <code>ExecutorService</code>
+ * to ensure that consumers have the required values to proceed before running. The <code>Operation</code> node must also implement a
+ * differentiation method, which calculates its derivative.
  */
 public abstract class Operation extends Node implements Callable<Tensor> {
 
@@ -50,9 +48,9 @@ public abstract class Operation extends Node implements Callable<Tensor> {
     Operation(Node... children) {
         super(children);
 
-		for (Node child : children) {
-			child.getConsumers().add(this);
-		}
+        for (Node child : children) {
+            child.getConsumers().add(this);
+        }
     }
 
     /**
@@ -60,8 +58,7 @@ public abstract class Operation extends Node implements Callable<Tensor> {
      *
      * @return the output of this node, as a tensor
      */
-    @Override
-    public Tensor call() {
+    @Override public Tensor call() {
         return computeOutput();
     }
 
@@ -79,8 +76,7 @@ public abstract class Operation extends Node implements Callable<Tensor> {
      *
      * @return the output of this node, as a tensor
      */
-    @Override
-    protected Tensor computeOutput() {
+    @Override protected Tensor computeOutput() {
         return computeOutput(Arrays.stream(children).map(Results::get).toArray(Tensor[]::new));
     }
 }

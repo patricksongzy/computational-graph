@@ -32,42 +32,32 @@ import neural.math.Tensor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphTest {
-    /**
-     * Tears down after each test. All graphs are cleared, in order to ensure that nodes which are not used do not affect results.
-     */
-    @AfterEach
-    void teardown() {
-        Graph.clearAll();
+    @Test void executeNodeTest() {
+        Placeholder a = new Placeholder();
+        Placeholder b = new Placeholder();
+        Placeholder c = new Placeholder();
+
+        Map<Placeholder, Tensor> placeholderMap = new HashMap<>();
+        placeholderMap.put(a, new Tensor.Builder(1).setValues(2).build());
+        placeholderMap.put(b, new Tensor.Builder(3).setValues(1, 5, 6).build());
+        placeholderMap.put(c, new Tensor.Builder(3).setValues(3, 2, 8).build());
+
+        Addition d = new Addition(a, a);
+        Multiplication e = new Multiplication(a, b, d);
+
+        Graph.compute(placeholderMap, e);
+
+        Tensor expected = new Tensor.Builder(3).setValues(8, 40, 48).build();
+        assertThat(Results.get(e)).isEqualTo(expected);
     }
 
-    /**
-     * Tests the calculation of separate trees to ensure that the nodes calculate properly and to ensure the graphs sort properly.
-     */
-    @Test
-    void separateTreeTest() {
-        Constant a = new Constant(new float[] {3, 2, 1}, 3);
-        Constant b = new Constant(new float[] {1, 2, 1}, 3);
-        Constant c = new Constant(new float[] {1, 3, 2}, 3);
-        Constant d = new Constant(new float[] {1, 2, 3}, 3);
-
-        Addition e = new Addition(a, b);
-        Addition f = new Addition(c, d);
-
-        Graph.compute(new HashMap<>(), e, f);
-        assertThat(Results.get(e)).isEqualTo(new Tensor.Builder(3).setValues(4, 4, 2).build());
-        assertThat(Results.get(f)).isEqualTo(new Tensor.Builder(3).setValues(2, 5, 5).build());
-    }
-
-    @Test
-    void multipleGraphsTest() {
+    @Test void multipleGraphsTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
         Placeholder c = new Placeholder();
@@ -107,28 +97,31 @@ class GraphTest {
         assertThat(Results.get(i)).isEqualTo(expected);
     }
 
-    @Test
-    void executeNodeTest() {
-        Placeholder a = new Placeholder();
-        Placeholder b = new Placeholder();
-        Placeholder c = new Placeholder();
+    /**
+     * Tests the calculation of separate trees to ensure that the nodes calculate properly and to ensure the graphs sort properly.
+     */
+    @Test void separateTreeTest() {
+        Constant a = new Constant(new float[] {3, 2, 1}, 3);
+        Constant b = new Constant(new float[] {1, 2, 1}, 3);
+        Constant c = new Constant(new float[] {1, 3, 2}, 3);
+        Constant d = new Constant(new float[] {1, 2, 3}, 3);
 
-        Map<Placeholder, Tensor> placeholderMap = new HashMap<>();
-        placeholderMap.put(a, new Tensor.Builder(1).setValues(2).build());
-        placeholderMap.put(b, new Tensor.Builder(3).setValues(1, 5, 6).build());
-        placeholderMap.put(c, new Tensor.Builder(3).setValues(3, 2, 8).build());
+        Addition e = new Addition(a, b);
+        Addition f = new Addition(c, d);
 
-        Addition d = new Addition(a, a);
-        Multiplication e = new Multiplication(a, b, d);
-
-        Graph.compute(placeholderMap, e);
-
-        Tensor expected = new Tensor.Builder(3).setValues(8, 40, 48).build();
-        assertThat(Results.get(e)).isEqualTo(expected);
+        Graph.compute(new HashMap<>(), e, f);
+        assertThat(Results.get(e)).isEqualTo(new Tensor.Builder(3).setValues(4, 4, 2).build());
+        assertThat(Results.get(f)).isEqualTo(new Tensor.Builder(3).setValues(2, 5, 5).build());
     }
 
-    @Test
-    void unusedNodeTest() {
+    /**
+     * Tears down after each test. All graphs are cleared, in order to ensure that nodes which are not used do not affect results.
+     */
+    @AfterEach void teardown() {
+        Graph.clearAll();
+    }
+
+    @Test void unusedNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
         Placeholder c = new Placeholder();

@@ -24,10 +24,11 @@
 
 package neural.graph.node;
 
-import java.util.ArrayList;
-import java.util.List;
 import neural.graph.node.operation.Operation;
 import neural.math.Tensor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A <code>Node</code> represents a given operation or value in the computational graph. A
@@ -79,8 +80,7 @@ public abstract class Node {
         return nodeID;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "id: " + nodeID;
     }
 }

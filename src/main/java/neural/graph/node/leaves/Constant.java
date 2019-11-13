@@ -53,8 +53,7 @@ public class Constant extends Node {
      *
      * @return the constant, as a tensor
      */
-    @Override
-    public Tensor computeOutput() {
+    @Override public Tensor computeOutput() {
         return values;
     }
 }
