@@ -26,15 +26,15 @@ package neural.graph.node;
 
 import neural.graph.exception.NodeComputationException;
 import neural.graph.node.leaves.Placeholder;
-import neural.graph.node.operation.Operation;
 import neural.math.Tensor;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
+/**
+ * A <code>Graph</code> represents a computational graph. It is used to calculate a node, and its gradient. Graphs are sorted to maximise
+ * efficiency.
+ */
 public class Graph {
 
     // the executor service is used to execute operations efficiently
@@ -52,6 +52,9 @@ public class Graph {
     // a list of nodes in the graph
     private List<Node> nodes = new ArrayList<>();
     private boolean isSorted = false;
+
+    private int outputAmount;
+    private Node[] computedNodes;
 
     /**
      * Constructs a graph and adds it to the list of graphs.
@@ -105,24 +108,41 @@ public class Graph {
         }
 
         Node[] sorted = current.nodes.stream().filter(discoverable::contains).toArray(Node[]::new);
+        current.outputAmount = outputNodes.length;
+        current.computedNodes = sorted;
 
         try {
-            for (Node node : sorted) {
-                if (node instanceof Operation) {
+            for (Node currentNode : sorted) {
+                if (currentNode instanceof Operation) {
                     // run the operation using the executor, and submit the result as a future
-                    Operation operation = (Operation) node;
-                    Results.put(operation, es.submit(operation));
+                    Operation operation = (Operation) currentNode;
+                    Results.putOutput(operation, es.submit((Callable<Tensor>) operation::computeOutput));
                 } else {
                     // non-operations do not need to be submitted to the executor
-                    Results.put(node, CompletableFuture.completedFuture(node.computeOutput()));
+                    Results.putOutput(currentNode, CompletableFuture.completedFuture(currentNode.computeOutput()));
                 }
             }
 
             // ensure that all nodes have been computed
-            Results.getAll();
+            Results.getAllOutputs();
         } catch (InterruptedException | ExecutionException e) {
             es.shutdown();
             throw new NodeComputationException(e);
+        }
+    }
+
+    /**
+     * Starts the computation of the gradient for a node on the graph, given whether it is an end node or not.
+     *
+     * @param currentNode the node to compute the gradients for
+     * @param isEndNode whether the node is an end node or not
+     */
+    private static void computeGradient(Node currentNode, boolean isEndNode) {
+        if (currentNode instanceof Operation) {
+            Operation operation = (Operation) currentNode;
+            Results.putGradient(operation, es.submit(() -> operation.computeGradients(isEndNode)));
+        } else {
+            Results.putGradient(currentNode, CompletableFuture.completedFuture(currentNode.computeGradients(isEndNode)));
         }
     }
 
@@ -136,7 +156,7 @@ public class Graph {
             for (Placeholder placeholder : placeholderMap.keySet()) {
                 // placeholders do not need to be added from other graphs
                 if (current.nodes.contains(placeholder)) {
-                    Results.put(placeholder, CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
+                    Results.putOutput(placeholder, CompletableFuture.completedFuture(placeholderMap.get(placeholder)));
                 }
             }
         }
@@ -158,6 +178,36 @@ public class Graph {
      */
     @SuppressWarnings("unused") public static Graph getDefault() {
         return graphs.get(0);
+    }
+
+    /**
+     * Computes the gradient of all nodes which were computed when the graph was last run.
+     */
+    @SuppressWarnings("WeakerAccess") public static void gradient() {
+        // check if the graph was run
+        if (current.computedNodes != null) {
+            try {
+                // compute the gradients of the end nodes
+                for (int i = current.computedNodes.length - 1; i >= current.computedNodes.length - current.outputAmount; i--) {
+                    Node currentNode = current.computedNodes[i];
+                    computeGradient(currentNode, true);
+                }
+
+                // compute the gradients of the other nodes
+                for (int i = current.computedNodes.length - current.outputAmount - 1; i >= 0; i--) {
+                    Node currentNode = current.computedNodes[i];
+                    computeGradient(currentNode, false);
+                }
+
+                // ensure all gradients have been computed
+                Results.getAllGradients();
+            } catch (InterruptedException | ExecutionException e) {
+                es.shutdown();
+                throw new NodeComputationException(e);
+            }
+        } else {
+            throw new IllegalStateException("The graph has not been computed, therefore the gradient cannot be computed.");
+        }
     }
 
     /**

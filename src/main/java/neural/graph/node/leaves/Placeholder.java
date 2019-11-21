@@ -43,9 +43,9 @@ public class Placeholder extends Node {
      * if it was inputted.
      *
      * @return the value which was passed in for this node, as a tensor
-     * @see Results#get(Node)
+     * @see Results#getOutput(Node)
      */
-    @Override public Tensor computeOutput() {
-        return Results.get(this);
+    @Override protected Tensor computeOutput() {
+        return Results.getOutput(this);
     }
 }

@@ -36,16 +36,27 @@ public class Constant extends Node {
     private final Tensor values;
 
     /**
-     * Constructs a <code>Constant</code> node, by creating a tensor from values and dimensions.
+     * Constructs a <code>Constant</code> node from a tensor.
      *
-     * @param values     the values of the constant
-     * @param dimensions the dimensions of the constant
+     * @param values the tensor values of the constant
      * @see Node#Node(Node...)
      */
-    public Constant(float[] values, int... dimensions) {
+    public Constant(Tensor values) {
         super();
 
-        this.values = new Tensor.Builder(dimensions).setValues(values).build();
+        this.values = values;
+    }
+
+    /**
+     * Constructs a <code>Constant</code> node, by creating a single-value tensor.
+     *
+     * @param value the value of the constant
+     * @see Node#Node(Node...)
+     */
+    public Constant(float value) {
+        super();
+
+        this.values = new Tensor.Builder(1).setValues(value).build();
     }
 
     /**
@@ -53,7 +64,7 @@ public class Constant extends Node {
      *
      * @return the constant, as a tensor
      */
-    @Override public Tensor computeOutput() {
+    @Override protected Tensor computeOutput() {
         return values;
     }
 }

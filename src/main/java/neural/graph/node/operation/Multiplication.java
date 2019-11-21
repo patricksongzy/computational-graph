@@ -25,7 +25,11 @@
 package neural.graph.node.operation;
 
 import neural.graph.node.Node;
+import neural.graph.node.Operation;
+import neural.graph.node.Results;
 import neural.math.Tensor;
+
+import java.util.Map;
 
 /**
  * A <code>Multiplication</code> node represents a node which applies an <b>element-wise</b>
@@ -37,33 +41,25 @@ public class Multiplication extends Operation {
         super(children);
     }
 
+    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
+        for (Node child : children) {
+            Tensor gradient = Tensor.unbroadcast(
+                    Operations.multiplication(delta, Operations.division(Results.getOutput(this), Results.getOutput(child))),
+                    Results.getOutput(child).getDimensions());
+
+            gradients.put(child.getID(), gradient);
+        }
+
+        return gradients;
+    }
+
     /**
      * Element-wise multiplies the inputted tensors, broadcasting them if necessary.
      *
      * @param inputs the inputs of this node, as tensors
      * @return the output of this node, as a tensor
      */
-    @Override public Tensor computeOutput(Tensor[] inputs) {
-        // check if the tensors require broadcasting, then broadcast if necessary
-        if (Tensor.isDimensionsMismatch(inputs)) {
-            inputs = Tensor.broadcast(inputs);
-        }
-
-        // create an output tensor with the output dimensions
-        Tensor result = Tensor.zeros(inputs[0].getDimensions());
-        for (int i = 0; i < result.getLength(); i++) {
-            float product = 1;
-
-            // add each tensor element-wise
-            // because they are broadcast, this may be done by absolute index
-            for (Tensor input : inputs) {
-                product *= input.get(i);
-            }
-
-            // set the proper value in the result
-            result.set(product, i);
-        }
-
-        return result;
+    @Override protected Tensor computeOutput(Tensor[] inputs) {
+        return Operations.multiplication(inputs);
     }
 }

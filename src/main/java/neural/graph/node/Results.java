@@ -40,6 +40,8 @@ public class Results {
 
     // the results are stored based on node ID
     private static final Map<Long, Future<Tensor>> results = new HashMap<>();
+    private static final Map<Long, Tensor> nodeGradients = new HashMap<>();
+    private static final Map<Long, Future<Map<Long, Tensor>>> computedGradients = new HashMap<>();
 
     /**
      * Clears any stored results.
@@ -48,21 +50,14 @@ public class Results {
         results.clear();
     }
 
-    /**
-     * Gets the output of a node.
-     *
-     * @param node the node whose output to get
-     * @return the output of the node
-     * @throws IllegalArgumentException if attempting to retrieve a value which does not exist or
-     *                                  has not yet been computed
-     */
-    public static Tensor get(Node node) {
-        if (!results.containsKey(node.getID())) {
-            throw new IllegalArgumentException("Attempting to retrieve value which has not yet been computed.");
-        }
-
+    private static <T> T get(Map<Long, Future<T>> map, Node node) {
         try {
-            return results.get(node.getID()).get();
+            T result = map.get(node.getID()).get();
+
+            if (result == null)
+                throw new IllegalArgumentException("Attempting to retrieve value which has not yet been computed.");
+
+            return result;
         } catch (InterruptedException | ExecutionException e) {
             throw new NodeComputationException(e);
         }
@@ -74,10 +69,51 @@ public class Results {
      * @throws ExecutionException   if any exceptions are thrown during execution
      * @throws InterruptedException if any executions are interrupted
      */
-    static void getAll() throws ExecutionException, InterruptedException {
-        for (Future<Tensor> future : results.values()) {
+    static void getAllOutputs() throws ExecutionException, InterruptedException {
+        for (Future future : results.values()) {
             future.get();
         }
+    }
+
+    static void getAllGradients() throws ExecutionException, InterruptedException {
+        for (Map.Entry<Long, Future<Map<Long, Tensor>>> entry : computedGradients.entrySet()) {
+            Map<Long, Tensor> deltas = entry.getValue().get();
+            nodeGradients.put(entry.getKey(), deltas.get(entry.getKey()));
+        }
+    }
+
+    static Tensor getComputedGradients(Node parent, Node child) {
+        Tensor gradient = get(computedGradients, parent).get(child.getID());
+
+        if (gradient == null)
+            throw new IllegalArgumentException(
+                    String.format("Attempting to retrieve null value from '%d', for node '%d'.", parent.getID(), child.getID()));
+
+        return gradient;
+    }
+
+    public static Tensor getGradient(Node node) {
+        return nodeGradients.get(node.getID());
+    }
+
+    /**
+     * Gets the output of a node.
+     *
+     * @param node the node whose output to get
+     * @return the output of the node
+     * @throws IllegalArgumentException if attempting to retrieve a value which does not exist or
+     *                                  has not yet been computed
+     */
+    public static Tensor getOutput(Node node) {
+        return get(results, node);
+    }
+
+    private static <T> void put(Map<Long, Future<T>> map, Node node, Future<T> value) {
+        map.put(node.getID(), value);
+    }
+
+    static void putGradient(Node node, Future<Map<Long, Tensor>> value) {
+        put(computedGradients, node, value);
     }
 
     /**
@@ -86,7 +122,7 @@ public class Results {
      * @param node  the node whose output to store
      * @param value the output of the node
      */
-    static void put(Node node, Future<Tensor> value) {
-        results.put(node.getID(), value);
+    static void putOutput(Node node, Future<Tensor> value) {
+        put(results, node, value);
     }
 }

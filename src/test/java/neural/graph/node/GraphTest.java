@@ -38,6 +38,19 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphTest {
+    @Test void addBroadcastGradientsTest() {
+        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
+        Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
+
+        Addition c = new Addition(a, b);
+
+        Graph.compute(null, c);
+        Graph.gradient();
+
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(2, 2, 2).build());
+    }
+
     @Test void executeNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
@@ -54,7 +67,25 @@ class GraphTest {
         Graph.compute(placeholderMap, e);
 
         Tensor expected = new Tensor.Builder(3).setValues(8, 40, 48).build();
-        assertThat(Results.get(e)).isEqualTo(expected);
+        assertThat(Results.getOutput(e)).isEqualTo(expected);
+    }
+
+    @Test void gradientsTest() {
+        Constant a = new Constant(2);
+        Constant b = new Constant(1);
+        Constant one = new Constant(1);
+
+        Addition c = new Addition(a, b);
+        Addition d = new Addition(b, one);
+
+        Multiplication e = new Multiplication(c, d);
+
+        Graph.compute(null, e);
+
+        Graph.gradient();
+
+        assertThat(Results.getGradient(a).getValues()).isEqualTo(new float[] {2});
+        assertThat(Results.getGradient(b).getValues()).isEqualTo(new float[] {5});
     }
 
     @Test void multipleGraphsTest() {
@@ -87,31 +118,44 @@ class GraphTest {
         graph.setCurrent();
 
         placeholderMap.clear();
-        placeholderMap.put(pd, Results.get(d));
-        placeholderMap.put(pe, Results.get(e));
-        placeholderMap.put(pf, Results.get(f));
+        placeholderMap.put(pd, Results.getOutput(d));
+        placeholderMap.put(pe, Results.getOutput(e));
+        placeholderMap.put(pf, Results.getOutput(f));
 
         Graph.compute(placeholderMap, i);
 
         Tensor expected = new Tensor.Builder(3).setValues(260, 704, 2320).build();
-        assertThat(Results.get(i)).isEqualTo(expected);
+        assertThat(Results.getOutput(i)).isEqualTo(expected);
+    }
+
+    @Test void multiplyBroadcastGradientsTest() {
+        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
+        Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
+
+        Multiplication c = new Multiplication(a, b);
+
+        Graph.compute(null, c);
+        Graph.gradient();
+
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(3, 2, 1, 3, 2, 1).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(8, 9, 8).build());
     }
 
     /**
      * Tests the calculation of separate trees to ensure that the nodes calculate properly and to ensure the graphs sort properly.
      */
     @Test void separateTreeTest() {
-        Constant a = new Constant(new float[] {3, 2, 1}, 3);
-        Constant b = new Constant(new float[] {1, 2, 1}, 3);
-        Constant c = new Constant(new float[] {1, 3, 2}, 3);
-        Constant d = new Constant(new float[] {1, 2, 3}, 3);
+        Constant a = new Constant(new Tensor.Builder(3).setValues(3, 2, 1).build());
+        Constant b = new Constant(new Tensor.Builder(3).setValues(1, 2, 1).build());
+        Constant c = new Constant(new Tensor.Builder(3).setValues(1, 3, 2).build());
+        Constant d = new Constant(new Tensor.Builder(3).setValues(1, 2, 3).build());
 
         Addition e = new Addition(a, b);
         Addition f = new Addition(c, d);
 
         Graph.compute(new HashMap<>(), e, f);
-        assertThat(Results.get(e)).isEqualTo(new Tensor.Builder(3).setValues(4, 4, 2).build());
-        assertThat(Results.get(f)).isEqualTo(new Tensor.Builder(3).setValues(2, 5, 5).build());
+        assertThat(Results.getOutput(e)).isEqualTo(new Tensor.Builder(3).setValues(4, 4, 2).build());
+        assertThat(Results.getOutput(f)).isEqualTo(new Tensor.Builder(3).setValues(2, 5, 5).build());
     }
 
     /**

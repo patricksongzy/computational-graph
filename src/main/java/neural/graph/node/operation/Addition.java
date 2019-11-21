@@ -25,7 +25,11 @@
 package neural.graph.node.operation;
 
 import neural.graph.node.Node;
+import neural.graph.node.Operation;
+import neural.graph.node.Results;
 import neural.math.Tensor;
+
+import java.util.Map;
 
 /**
  * An <code>Addition</code> node represents a node which applies an <b>element-wise</b> addition
@@ -43,27 +47,16 @@ public class Addition extends Operation {
      * @param inputs the inputs of this node, as tensors
      * @return the output of this node, as a tensor
      */
-    @Override public Tensor computeOutput(Tensor[] inputs) {
-        // check if the tensors require broadcasting, then broadcast if necessary
-        if (Tensor.isDimensionsMismatch(inputs)) {
-            inputs = Tensor.broadcast(inputs);
+    @Override protected Tensor computeOutput(Tensor[] inputs) {
+        return Operations.addition(inputs);
+    }
+
+    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor deltas) {
+        // the derivative of additions is one
+        for (Node child : children) {
+            gradients.put(child.getID(), Tensor.unbroadcast(deltas, Results.getOutput(child).getDimensions()));
         }
 
-        // create an output tensor with the output dimensions
-        Tensor result = Tensor.zeros(inputs[0].getDimensions());
-        for (int i = 0; i < result.getLength(); i++) {
-            float sum = 0;
-
-            // add each tensor element-wise
-            // because they are broadcast, this may be done by absolute index
-            for (Tensor input : inputs) {
-                sum += input.get(i);
-            }
-
-            // set the proper value in the result
-            result.set(sum, i);
-        }
-
-        return result;
+        return gradients;
     }
 }

@@ -56,6 +56,20 @@ class TensorTest {
         assertThat(results).isEqualTo(expected);
     }
 
+    @Test void unbroadcast() {
+        Tensor t1 = new Tensor.Builder(3, 1, 2).setValues(1, 2, 2, 3, 3, 4).build();
+        Tensor t2 = new Tensor.Builder(3, 3, 1).setValues(1, 2, 3, 5, 2, 3, 8, 7, 9).build();
+
+        Tensor t1Broadcast = Tensor.broadcast(t1, t2)[0];
+        Tensor expected = new Tensor.Builder(3, 1, 2).setValues(3, 6, 6, 9, 9, 12).build();
+
+        assertThat(Tensor.unbroadcast(t1Broadcast, t1.getDimensions())).isEqualTo(expected);
+    }
+
+    @Test void getFlattenedIndex() {
+        assertThat(Tensor.getFlattenedIndex(new int[] {3, 2}, new int[] {0, 0, 0, 2, 1})).isEqualTo(5);
+    }
+
     @Test void broadcastFailed() {
         Tensor t1 = Tensor.zeros(3, 2);
         Tensor t2 = Tensor.zeros(3, 5);
@@ -132,14 +146,14 @@ class TensorTest {
         assertThat(t1.get(2)).isEqualTo(2);
     }
 
-    @Test void getBroadcast() {
+    @Test void getBroadcastValue() {
         Tensor t1 = Tensor.zeros(5, 3);
 
         for (int i = 0; i < t1.getLength(); i++) {
             t1.getValues()[i] = i;
         }
 
-        assertThat(t1.getBroadcast(new int[] {1, 5, 3}, new int[] {1, 2, 2})).isEqualTo(8);
+        assertThat(t1.getBroadcastedValue(new int[] {1, 5, 3}, new int[] {1, 2, 2})).isEqualTo(8);
     }
 
     @Test void set() {

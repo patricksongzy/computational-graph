@@ -22,14 +22,11 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.operation;
+package neural.graph.node;
 
-import neural.graph.node.Node;
-import neural.graph.node.Results;
 import neural.math.Tensor;
 
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 
 /**
  * An <code>Operation</code> represents a node which applies an operation to one or more inputs. <code>Operation</code> implements
@@ -37,7 +34,7 @@ import java.util.concurrent.Callable;
  * to ensure that consumers have the required values to proceed before running. The <code>Operation</code> node must also implement a
  * differentiation method, which calculates its derivative.
  */
-public abstract class Operation extends Node implements Callable<Tensor> {
+public abstract class Operation extends Node {
 
     /**
      * Constructs an <code>Operation</code> node, adding itself to the consumers of its children.
@@ -45,21 +42,12 @@ public abstract class Operation extends Node implements Callable<Tensor> {
      * @param children the children of the node
      * @see Node#Node(Node...)
      */
-    Operation(Node... children) {
+    protected Operation(Node... children) {
         super(children);
 
         for (Node child : children) {
             child.getConsumers().add(this);
         }
-    }
-
-    /**
-     * When this node is called, it will compute and return its output.
-     *
-     * @return the output of this node, as a tensor
-     */
-    @Override public Tensor call() {
-        return computeOutput();
     }
 
     /**
@@ -77,6 +65,6 @@ public abstract class Operation extends Node implements Callable<Tensor> {
      * @return the output of this node, as a tensor
      */
     @Override protected Tensor computeOutput() {
-        return computeOutput(Arrays.stream(children).map(Results::get).toArray(Tensor[]::new));
+        return computeOutput(Arrays.stream(children).map(Results::getOutput).toArray(Tensor[]::new));
     }
 }
