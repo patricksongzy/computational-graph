@@ -200,13 +200,22 @@ public class Tensor {
         return Arrays.stream(tensors).map(Tensor::getDimensions).anyMatch(dim -> !Arrays.equals(dim, tensors[0].dimensions));
     }
 
+    /**
+     * Checks if the given indices are invalid, ignoring leading zeros.
+     *
+     * @param indices    the indices of the tensor
+     * @param dimensions the dimensions of the tensor
+     * @return whether the given indices are invalid
+     */
     private static boolean isIndicesInvalid(int[] indices, int[] dimensions) {
         if (indices.length < dimensions.length)
             return true;
 
         if (indices.length > dimensions.length) {
+            // extra indices are trimmed
             int difference = indices.length - dimensions.length;
 
+            // ensure the given indices are zeros
             for (int i = 0; i < difference; i++) {
                 if (indices[i] != 0)
                     return true;
@@ -216,6 +225,12 @@ public class Tensor {
         return false;
     }
 
+    /**
+     * Constructs a tensor filled with ones.
+     *
+     * @param dimensions the row-major dimensions of the tensor
+     * @return the tensor filled with ones
+     */
     public static Tensor ones(int... dimensions) {
         Tensor ones = new Tensor.Builder(dimensions).build();
         ones.fill(1);
@@ -223,6 +238,12 @@ public class Tensor {
         return ones;
     }
 
+    /**
+     * Trims the given dimensions, removing leading ones.
+     *
+     * @param dimensions the row-major dimensions of the tensor
+     * @return the trimmed row-major dimensions of the tensor
+     */
     private static int[] trimDimensions(int[] dimensions) {
         int leadingOnes = 0;
         for (int i = 0; i < dimensions.length; i++) {
@@ -238,7 +259,15 @@ public class Tensor {
         return trimmed;
     }
 
+    /**
+     * Unbroadcasts the given tensor by summing along the broadcasted dimensions.
+     *
+     * @param tensor                  the tensor to unbroadcast
+     * @param unbroadcastedDimensions the row-major dimensions of the unbroadcasted tensor
+     * @return the unbroadcasted tensor
+     */
     public static Tensor unbroadcast(Tensor tensor, int[] unbroadcastedDimensions) {
+        // find the dimensions which have been broadcasted
         int[] broadcastDimensions = IntStream.range(0, tensor.dimensions.length).filter(i -> {
             int broadcastIndex = tensor.dimensions.length - i - 1;
             int unbroadcastIndex = unbroadcastedDimensions.length - i - 1;
@@ -246,12 +275,14 @@ public class Tensor {
             if (unbroadcastIndex < 0)
                 return true;
 
+            // if the dimensions mismatch, they have been broadcasted
             return tensor.dimensions[broadcastIndex] != unbroadcastedDimensions[unbroadcastIndex];
         }).map(i -> tensor.dimensions.length - i - 1).toArray();
 
         if (broadcastDimensions.length == 0)
             return tensor;
 
+        // sum along the broadcasted dimensions
         return Operations.sum(tensor, broadcastDimensions);
     }
 

@@ -50,6 +50,14 @@ public class Results {
         results.clear();
     }
 
+    /**
+     * Gets a stored result from the given map of a node and of some generic.
+     *
+     * @param map  the map to get the result from
+     * @param node the node in whose value to store
+     * @param <T>  the generic value of the map
+     * @return the generic value of the map given the node
+     */
     private static <T> T get(Map<Long, Future<T>> map, Node node) {
         try {
             T result = map.get(node.getID()).get();
@@ -60,6 +68,19 @@ public class Results {
             return result;
         } catch (InterruptedException | ExecutionException e) {
             throw new NodeComputationException(e);
+        }
+    }
+
+    /**
+     * Gets all gradients and puts them in an array of gradients.
+     *
+     * @throws ExecutionException   if any exceptions are thrown during execution
+     * @throws InterruptedException if any executions are interrupted
+     */
+    static void getAllGradients() throws ExecutionException, InterruptedException {
+        for (Map.Entry<Long, Future<Map<Long, Tensor>>> entry : computedGradients.entrySet()) {
+            Map<Long, Tensor> deltas = entry.getValue().get();
+            nodeGradients.put(entry.getKey(), deltas.get(entry.getKey()));
         }
     }
 
@@ -75,13 +96,13 @@ public class Results {
         }
     }
 
-    static void getAllGradients() throws ExecutionException, InterruptedException {
-        for (Map.Entry<Long, Future<Map<Long, Tensor>>> entry : computedGradients.entrySet()) {
-            Map<Long, Tensor> deltas = entry.getValue().get();
-            nodeGradients.put(entry.getKey(), deltas.get(entry.getKey()));
-        }
-    }
-
+    /**
+     * Gets a gradient computed by the given parent node for the child node's output.
+     *
+     * @param parent the parent node which computed the gradient
+     * @param child  the child node which the gradient was computed for
+     * @return the gradient of the child node's output
+     */
     static Tensor getComputedGradients(Node parent, Node child) {
         Tensor gradient = get(computedGradients, parent).get(child.getID());
 
@@ -92,7 +113,13 @@ public class Results {
         return gradient;
     }
 
-    public static Tensor getGradient(Node node) {
+    /**
+     * Gets the gradient for the given node.
+     *
+     * @param node the node whose gradient to retrieve
+     * @return the gradient of the given node
+     */
+    @SuppressWarnings("WeakerAccess") public static Tensor getGradient(Node node) {
         return nodeGradients.get(node.getID());
     }
 
@@ -108,10 +135,24 @@ public class Results {
         return get(results, node);
     }
 
+    /**
+     * Puts a value to the given map of a node and future of some generic.
+     *
+     * @param map   the map to put the future to
+     * @param node  the node whose future to store
+     * @param value the value of the future
+     * @param <T>   the generic of the future
+     */
     private static <T> void put(Map<Long, Future<T>> map, Node node, Future<T> value) {
         map.put(node.getID(), value);
     }
 
+    /**
+     * Puts a gradient to the computed gradients.
+     *
+     * @param node  the node whose gradient to store
+     * @param value the future for the computed gradient
+     */
     static void putGradient(Node node, Future<Map<Long, Tensor>> value) {
         put(computedGradients, node, value);
     }
@@ -120,7 +161,7 @@ public class Results {
      * Adds the output of a node, alongside with the respective ID to the results.
      *
      * @param node  the node whose output to store
-     * @param value the output of the node
+     * @param value the future for the output of the node
      */
     static void putOutput(Node node, Future<Tensor> value) {
         put(results, node, value);
