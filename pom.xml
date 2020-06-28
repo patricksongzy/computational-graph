@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>patricksongzy</groupId>
-    <artifactId>neural-computational-graph</artifactId>
+    <artifactId>computational-graph</artifactId>
     <version>0.1.0</version>
 
     <packaging>jar</packaging>

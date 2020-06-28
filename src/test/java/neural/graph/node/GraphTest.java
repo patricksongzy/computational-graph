@@ -38,6 +38,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphTest {
+    /**
+     * Tests the gradient calculation from addition of tensors with compatible, but non-matching dimensions.
+     */
     @Test void addBroadcastGradientsTest() {
         Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
         Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
@@ -51,6 +54,9 @@ class GraphTest {
         assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(2, 2, 2).build());
     }
 
+    /**
+     * Tests the gradient calculation of a specific node.
+     */
     @Test void executeNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
@@ -70,6 +76,9 @@ class GraphTest {
         assertThat(Results.getOutput(e)).isEqualTo(expected);
     }
 
+    /**
+     * Tests the gradient calculation of several chained operations.
+     */
     @Test void gradientsTest() {
         Constant a = new Constant(2);
         Constant b = new Constant(1);
@@ -88,6 +97,9 @@ class GraphTest {
         assertThat(Results.getGradient(b).getValues()).isEqualTo(new float[] {5});
     }
 
+    /**
+     * Tests that the presence of another graph does not affect the computation of some graph.
+     */
     @Test void multipleGraphsTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
@@ -102,6 +114,7 @@ class GraphTest {
         Multiplication e = new Multiplication(a, b, d);
         Addition f = new Addition(a, c);
 
+        // a * b * (a + a) + a + c
         Graph.compute(placeholderMap, e, f);
 
         Graph graph = new Graph().setCurrent();
@@ -122,12 +135,16 @@ class GraphTest {
         placeholderMap.put(pe, Results.getOutput(e));
         placeholderMap.put(pf, Results.getOutput(f));
 
+        // pd * pf * (pe + pf)
         Graph.compute(placeholderMap, i);
 
         Tensor expected = new Tensor.Builder(3).setValues(260, 704, 2320).build();
         assertThat(Results.getOutput(i)).isEqualTo(expected);
     }
 
+    /**
+     * Tests the gradient calculation from multiplication of tensors with compatible, but non-matching dimensions.
+     */
     @Test void multiplyBroadcastGradientsTest() {
         Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
         Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
@@ -165,6 +182,9 @@ class GraphTest {
         Graph.clearAll();
     }
 
+    /**
+     * Test to ensure that an unused node is properly sorted out.
+     */
     @Test void unusedNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();

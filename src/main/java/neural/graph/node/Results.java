@@ -46,7 +46,8 @@ public class Results {
     /**
      * Clears any stored results.
      */
-    @SuppressWarnings("unused") public static void clear() {
+    @SuppressWarnings("unused")
+    public static void clear() {
         results.clear();
     }
 
@@ -70,7 +71,7 @@ public class Results {
      * @throws InterruptedException if any executions are interrupted
      */
     static void getAllOutputs() throws ExecutionException, InterruptedException {
-        for (Future future : results.values()) {
+        for (Future<Tensor> future : results.values()) {
             future.get();
         }
     }
