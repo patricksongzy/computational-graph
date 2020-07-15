@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,6 @@ import java.util.concurrent.Future;
  * node ID.
  */
 public class Results {
-
     // the results are stored based on node ID
     private static final Map<Long, Future<Tensor>> results = new HashMap<>();
     private static final Map<Long, Tensor> nodeGradients = new HashMap<>();

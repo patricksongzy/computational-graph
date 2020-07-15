@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,6 @@ import java.util.Map;
  * <code>Node</code> must have a unique identifier and must keep track of consumers and children.
  */
 public abstract class Node {
-
     // the amount of nodes is used to uniquely identify each node
     private static long nodeCount = 0;
     // the children of the node are used as its inputs

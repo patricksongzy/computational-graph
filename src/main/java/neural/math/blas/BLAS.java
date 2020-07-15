@@ -35,23 +35,39 @@ public class BLAS {
     private static cl_device_id device;
 
     private static cl_context context;
-    private static cl_command_queue command_queue;
+    private static cl_command_queue commandQueue;
 
-    public static void init() {
+    static {
          int ret;
 
          ret = GPU.setupCL();
          if (ret != CL_SUCCESS)
-             return;
+             System.exit(ret);
 
          device = GPU.getDevice();
          context = GPU.getContext();
-         command_queue = GPU.getCommandQueue();
+         commandQueue = GPU.getCommandQueue();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Releasing resources.");
-            clReleaseCommandQueue(command_queue);
+            clReleaseCommandQueue(commandQueue);
             clReleaseContext(context);
         }));
+    }
+
+    public static cl_mem allocate(long flags, float[] values) {
+        int ret;
+
+        int[] retPointer = new int[1];
+        cl_mem buffer = clCreateBuffer(context, flags, values.length * Sizeof.cl_float, null, retPointer);
+        ret = retPointer[0];
+        if (ret != CL_SUCCESS)
+            System.exit(ret);
+
+        ret = clEnqueueWriteBuffer(commandQueue, buffer, true, 0, values.length * Sizeof.cl_float, Pointer.to(values), 0, null, null);
+        if (ret != CL_SUCCESS)
+            System.exit(ret);
+
+        return buffer;
     }
 }

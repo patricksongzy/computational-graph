@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,8 @@
 package neural.math;
 
 import neural.graph.node.operation.Operations;
+import neural.math.blas.BLAS;
+import org.jocl.cl_mem;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -35,13 +37,15 @@ import java.util.stream.IntStream;
  * broadcasted to the expected shape.
  */
 public class Tensor {
-
     // the dimensions of the tensor in row-major
     private final int[] dimensions;
     // the length of the dimensions
     private final int length;
     // the values of the tensor
     private final float[] values;
+
+    // the GPU buffer for the tensor
+    private cl_mem buffer;
 
     /**
      * Constructs a Tensor from a builder object. This constructor is private, as all tensors must
@@ -54,6 +58,11 @@ public class Tensor {
         this.values = builder.values;
         this.dimensions = trimDimensions(builder.dimensions);
         this.length = builder.length;
+    }
+
+    public cl_mem getBuffer(long flag) {
+        buffer = BLAS.allocate(flag, values);
+        return buffer;
     }
 
     /**
@@ -130,7 +139,7 @@ public class Tensor {
     }
 
     /**
-     * Returns the indices for each dimension given an flattened (absolute) index.
+     * Returns the indices for each dimension given a flattened (absolute) index.
      *
      * @param dimensions the dimensions of the tensor
      * @param index      the flattened (absolute) index
