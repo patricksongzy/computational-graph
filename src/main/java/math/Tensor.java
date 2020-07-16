@@ -61,15 +61,6 @@ public class Tensor {
         this.length = builder.length;
     }
 
-    public cl_mem getBuffer(long flag) {
-        buffer = BLAS.allocate(flag, values);
-        return buffer;
-    }
-
-    public void releaseBuffer() {
-        CL.clReleaseMemObject(buffer);
-    }
-
     /**
      * Broadcasts the given tensors. This alters the tensors such that their shapes are compatible.
      * The dimensions are iterated starting from the number of columns, and are broadcast if the
@@ -178,7 +169,8 @@ public class Tensor {
      * @param indices    the indices for the individual dimensions
      * @return the flattened (absolute) index
      */
-    @SuppressWarnings("WeakerAccess") public static int getFlattenedIndex(int[] dimensions, int[] indices) {
+    @SuppressWarnings("WeakerAccess")
+    public static int getFlattenedIndex(int[] dimensions, int[] indices) {
         if (Arrays.stream(indices).anyMatch(i -> i < 0))
             throw new IllegalArgumentException("Index cannot be negative.");
 
@@ -311,13 +303,58 @@ public class Tensor {
     }
 
     /**
+     * Retrieves the memory buffer.
+     *
+     * @return the memory buffer
+     */
+    public cl_mem getBuffer() {
+        return buffer;
+    }
+
+    /**
+     * Allocates a memory buffer, and stores it.
+     *
+     * @param flag the memory buffer flag
+     * @return the allocated memory buffer
+     */
+    public cl_mem allocateBuffer(long flag) {
+        buffer = BLAS.allocate(flag, values);
+        return buffer;
+    }
+
+    /**
+     * Updates the values of the tensor from reading its buffer.
+     */
+    public void readFromBuffer() {
+        float[] result = BLAS.readBuffer(buffer, length);
+        System.arraycopy(result, 0, values, 0, length);
+    }
+
+    /**
+     * Updates the memory buffer, releasing the current one if it is already set.
+     *
+     * @param buffer the memory buffer to set
+     */
+    public void setBuffer(cl_mem buffer) {
+        if (this.buffer != null)
+            releaseBuffer();
+
+        this.buffer = buffer;
+    }
+
+    public void releaseBuffer() {
+        CL.clReleaseMemObject(buffer);
+    }
+
+    /**
      * Checks if the dimensions and values of the tensor and another are equal, if the object
      * supplied is a tensor. Returns false if a tensor is not supplied.
      *
      * @param obj the other tensor
      * @return whether the two tensors are equal
      */
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         if (!(obj instanceof Tensor)) {
             return false;
         }
@@ -331,7 +368,8 @@ public class Tensor {
      *
      * @param values the values of the tensor.
      */
-    @SuppressWarnings({"unused", "WeakerAccess"}) public void fill(float... values) {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public void fill(float... values) {
         if (values.length == 1)
             Arrays.fill(this.values, values[0]);
         else if (values.length != this.values.length)
@@ -346,7 +384,8 @@ public class Tensor {
      * @param indices the indices for the individual dimensions
      * @return the value at the given indices
      */
-    @SuppressWarnings("WeakerAccess") public float get(int... indices) {
+    @SuppressWarnings("WeakerAccess")
+    public float get(int... indices) {
         return values[getFlattenedIndex(dimensions, indices)];
     }
 
@@ -422,7 +461,8 @@ public class Tensor {
      * @param value   the value to set
      * @param indices the indices for the individual dimensions
      */
-    @SuppressWarnings("WeakerAccess") public void set(float value, int... indices) {
+    @SuppressWarnings("WeakerAccess")
+    public void set(float value, int... indices) {
         if (isIndicesInvalid(indices, dimensions)) {
             throw new IllegalArgumentException(
                     String.format("Indices and dimensions do not match: '%d' != '%d'.", indices.length, dimensions.length));
@@ -445,7 +485,8 @@ public class Tensor {
         values[flattenedIndex] = value;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         // print the shape of the tensor
         StringBuilder result = new StringBuilder(String.format("<Tensor: shape=(%s)>",
                 Arrays.stream(dimensions).mapToObj(String::valueOf).collect(Collectors.joining(" x "))));

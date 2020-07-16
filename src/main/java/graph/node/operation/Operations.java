@@ -63,7 +63,7 @@ public class Operations {
      * @param inputs the tensors to broadcast
      * @return the broadcasted tensors
      */
-    private static Tensor[] broadcastInputs(Tensor... inputs) {
+    public static Tensor[] broadcastInputs(Tensor... inputs) {
         if (inputs.length == 0)
             throw new IllegalArgumentException("Cannot compute operation: no inputs provided.");
 
@@ -78,7 +78,7 @@ public class Operations {
      * Creates a broadcasted input array given a tensor to which an operation is applied to given an array of other tensors.
      *
      * @param start the tensor which the operation is applied to
-     * @param end the tensors to apply the operation using
+     * @param end   the tensors to apply the operation using
      * @return the broadcasted input array
      */
     private static Tensor[] createInputArray(Tensor start, Tensor... end) {
@@ -93,11 +93,12 @@ public class Operations {
     /**
      * Element-wise divides a given tensor by an array of tensors.
      *
-     * @param numerator the tensor which will be divided
+     * @param numerator    the tensor which will be divided
      * @param denominators the tensors which will divide the given tensor
      * @return the divided tensor
      */
-    @SuppressWarnings("WeakerAccess") public static Tensor division(Tensor numerator, Tensor... denominators) {
+    @SuppressWarnings("WeakerAccess")
+    public static Tensor division(Tensor numerator, Tensor... denominators) {
         if (denominators.length == 0)
             return numerator;
 
@@ -127,7 +128,8 @@ public class Operations {
      * @param inputs the tensors to multiply
      * @return the multiplied tensor
      */
-    @SuppressWarnings("WeakerAccess") public static Tensor multiplication(Tensor... inputs) {
+    @SuppressWarnings("WeakerAccess")
+    public static Tensor multiplication(Tensor... inputs) {
         inputs = broadcastInputs(inputs);
 
         // create an output tensor with the output dimensions
@@ -151,11 +153,12 @@ public class Operations {
     /**
      * Element-wise subtracts an array of tensors from a given tensor.
      *
-     * @param minuend the tensor to subtract from
+     * @param minuend    the tensor to subtract from
      * @param subtrahend the tensors to subtract
      * @return the subtracted tensor
      */
-    @SuppressWarnings("WeakerAccess") public static Tensor subtraction(Tensor minuend, Tensor... subtrahend) {
+    @SuppressWarnings("WeakerAccess")
+    public static Tensor subtraction(Tensor minuend, Tensor... subtrahend) {
         if (subtrahend.length == 0)
             return minuend;
 
@@ -183,7 +186,7 @@ public class Operations {
      * Computes a sum of a tensor along a specific axis.
      *
      * @param input the tensor to sum
-     * @param axes the axis to sum along
+     * @param axes  the axis to sum along
      * @return the tensor summed along the axis
      */
     public static Tensor sum(Tensor input, int... axes) {

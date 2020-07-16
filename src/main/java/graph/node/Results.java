@@ -119,7 +119,8 @@ public class Results {
      * @param node the graph.node whose gradient to retrieve
      * @return the gradient of the given graph.node
      */
-    @SuppressWarnings("WeakerAccess") public static Tensor getGradient(Node node) {
+    @SuppressWarnings("WeakerAccess")
+    public static Tensor getGradient(Node node) {
         return nodeGradients.get(node.getID());
     }
 

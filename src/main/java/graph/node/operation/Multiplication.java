@@ -41,7 +41,8 @@ public class Multiplication extends Operation {
         super(children);
     }
 
-    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
+    @Override
+    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
         for (Node child : children) {
             Tensor gradient = Tensor.unbroadcast(
                     Operations.multiplication(delta, Operations.division(Results.getOutput(this), Results.getOutput(child))),
@@ -59,7 +60,8 @@ public class Multiplication extends Operation {
      * @param inputs the inputs of this graph.node, as tensors
      * @return the output of this graph.node, as a tensor
      */
-    @Override protected Tensor computeOutput(Tensor[] inputs) {
+    @Override
+    protected Tensor computeOutput(Tensor[] inputs) {
         return Operations.multiplication(inputs);
     }
 }

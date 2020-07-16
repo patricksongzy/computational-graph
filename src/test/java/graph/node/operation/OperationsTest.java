@@ -32,7 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class OperationsTest {
 
-    @Test void addition() {
+    @Test
+    void addition() {
         Tensor t1 = new Tensor.Builder(1, 2).setValues(0, 1).build();
         Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
 
@@ -41,7 +42,8 @@ class OperationsTest {
         Assertions.assertThat(Operations.addition(t1, t2)).isEqualTo(expected);
     }
 
-    @Test void multiplication() {
+    @Test
+    void multiplication() {
         Tensor t1 = new Tensor.Builder(1, 2).setValues(0, 1).build();
         Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
 
@@ -50,7 +52,8 @@ class OperationsTest {
         assertThat(Operations.multiplication(t1, t2)).isEqualTo(expected);
     }
 
-    @Test void division() {
+    @Test
+    void division() {
         Tensor t1 = new Tensor.Builder(2).setValues(0, 1).build();
         Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 5, 3, 10, 6, 2).build();
 
@@ -59,7 +62,8 @@ class OperationsTest {
         assertThat(Operations.division(t1, t2)).isEqualTo(expected);
     }
 
-    @Test void subtraction() {
+    @Test
+    void subtraction() {
         Tensor t1 = new Tensor.Builder(2).setValues(5, 2).build();
         Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 9, 8, 5, 2, 1).build();
 
@@ -71,7 +75,8 @@ class OperationsTest {
         assertThat(Operations.subtraction(t1, t2)).isEqualTo(expected);
     }
 
-    @Test void sum() {
+    @Test
+    void sum() {
         Tensor t1 = new Tensor.Builder(2, 2, 3).setValues(9, 7, 5, 5, 3, 5, 1, 3, 5, 2, 6, 9).build();
 
         Tensor expected = new Tensor.Builder(2, 1).setValues(30, 30).build();
@@ -79,7 +84,8 @@ class OperationsTest {
         assertThat(Operations.sum(t1, 0, 2)).isEqualTo(expected);
     }
 
-    @Test void sumVector() {
+    @Test
+    void sumVector() {
         Tensor t1 = new Tensor.Builder(2, 3).setValues(2, 7, 2, 8, 1, 9).build();
 
         Tensor expected = new Tensor.Builder(1, 3).setValues(10, 8, 11).build();

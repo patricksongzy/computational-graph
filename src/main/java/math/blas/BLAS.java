@@ -25,31 +25,37 @@
 package math.blas;
 
 import org.jocl.*;
+import org.jocl.blast.CLBlastLayout;
 
 import static org.jocl.CL.*;
+import static org.jocl.blast.CLBlast.CLBlastSgemm;
 
 public class BLAS {
-    private static cl_device_id device;
+    private static final cl_device_id device;
 
-    private static cl_context context;
-    private static cl_command_queue commandQueue;
+    private static final cl_context context;
+    private static final cl_command_queue commandQueue;
 
     static {
-         int ret;
+        int ret;
 
-         ret = GPU.setupCL();
-         if (ret != CL_SUCCESS)
-             System.exit(ret);
+        ret = GPU.setupCL();
+        if (ret != CL_SUCCESS)
+            System.exit(ret);
 
-         device = GPU.getDevice();
-         context = GPU.getContext();
-         commandQueue = GPU.getCommandQueue();
+        device = GPU.getDevice();
+        context = GPU.getContext();
+        commandQueue = GPU.getCommandQueue();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Releasing resources.");
             clReleaseCommandQueue(commandQueue);
             clReleaseContext(context);
         }));
+    }
+
+    public static void sgemm(cl_mem aBuffer, cl_mem bBuffer, cl_mem cBuffer, int aTranspose, int bTranspose, int m, int n, int k, int lda, int ldb, int ldc) {
+        CLBlastSgemm(CLBlastLayout.CLBlastLayoutRowMajor, aTranspose, bTranspose, m, n, k, 1.0f, aBuffer, 0, lda, bBuffer, 0, ldb, 1.0f, cBuffer, 0, ldc, commandQueue, null);
     }
 
     public static cl_mem allocate(long flags, float[] values) {
@@ -65,6 +71,15 @@ public class BLAS {
         if (ret != CL_SUCCESS)
             System.exit(ret);
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> clReleaseMemObject(buffer)));
+
         return buffer;
+    }
+
+    public static float[] readBuffer(cl_mem buffer, int length) {
+        float[] result = new float[length];
+        clEnqueueReadBuffer(commandQueue, buffer, true, 0, length * Sizeof.cl_float, Pointer.to(result), 0, null, null);
+
+        return result;
     }
 }

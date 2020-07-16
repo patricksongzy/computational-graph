@@ -64,7 +64,8 @@ public class Constant extends Node {
      *
      * @return the constant, as a tensor
      */
-    @Override protected Tensor computeOutput() {
+    @Override
+    protected Tensor computeOutput() {
         return values;
     }
 }

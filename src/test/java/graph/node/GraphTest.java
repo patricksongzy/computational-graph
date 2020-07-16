@@ -27,9 +27,10 @@ package graph.node;
 import graph.node.leaves.Constant;
 import graph.node.leaves.Placeholder;
 import graph.node.operation.Addition;
+import graph.node.operation.GEMM;
 import graph.node.operation.Multiplication;
 import math.Tensor;
-import org.assertj.core.api.Assertions;
+import org.jocl.blast.CLBlastTranspose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,9 +41,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphTest {
     /**
+     * Tests the matrix multiplication on the GPU.
+     */
+    @Test
+    void gemmTest() {
+        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+
+        GEMM c = new GEMM(CLBlastTranspose.CLBlastTransposeNo, CLBlastTranspose.CLBlastTransposeNo, a, b);
+
+        Graph.compute(null, c);
+
+        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
+    }
+
+    /**
      * Tests the gradient calculation from addition of tensors with compatible, but non-matching dimensions.
      */
-    @Test void addBroadcastGradientsTest() {
+    @Test
+    void addBroadcastGradientsTest() {
         Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
         Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
 
@@ -51,14 +68,15 @@ class GraphTest {
         Graph.compute(null, c);
         Graph.gradient();
 
-        Assertions.assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
         assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(2, 2, 2).build());
     }
 
     /**
      * Tests the gradient calculation of a specific graph.node.
      */
-    @Test void executeNodeTest() {
+    @Test
+    void executeNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
         Placeholder c = new Placeholder();
@@ -80,7 +98,8 @@ class GraphTest {
     /**
      * Tests the gradient calculation of several chained operations.
      */
-    @Test void gradientsTest() {
+    @Test
+    void gradientsTest() {
         Constant a = new Constant(2);
         Constant b = new Constant(1);
         Constant one = new Constant(1);
@@ -94,14 +113,15 @@ class GraphTest {
 
         Graph.gradient();
 
-        assertThat(Results.getGradient(a).getValues()).isEqualTo(new float[] {2});
-        assertThat(Results.getGradient(b).getValues()).isEqualTo(new float[] {5});
+        assertThat(Results.getGradient(a).getValues()).isEqualTo(new float[]{2});
+        assertThat(Results.getGradient(b).getValues()).isEqualTo(new float[]{5});
     }
 
     /**
      * Tests that the presence of another graph does not affect the computation of some graph.
      */
-    @Test void multipleGraphsTest() {
+    @Test
+    void multipleGraphsTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
         Placeholder c = new Placeholder();
@@ -146,7 +166,8 @@ class GraphTest {
     /**
      * Tests the gradient calculation from multiplication of tensors with compatible, but non-matching dimensions.
      */
-    @Test void multiplyBroadcastGradientsTest() {
+    @Test
+    void multiplyBroadcastGradientsTest() {
         Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
         Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
 
@@ -162,7 +183,8 @@ class GraphTest {
     /**
      * Tests the calculation of separate trees to ensure that the nodes calculate properly and to ensure the graphs sort properly.
      */
-    @Test void separateTreeTest() {
+    @Test
+    void separateTreeTest() {
         Constant a = new Constant(new Tensor.Builder(3).setValues(3, 2, 1).build());
         Constant b = new Constant(new Tensor.Builder(3).setValues(1, 2, 1).build());
         Constant c = new Constant(new Tensor.Builder(3).setValues(1, 3, 2).build());
@@ -179,14 +201,16 @@ class GraphTest {
     /**
      * Tears down after each test. All graphs are cleared, in order to ensure that nodes which are not used do not affect results.
      */
-    @AfterEach void teardown() {
+    @AfterEach
+    void teardown() {
         Graph.clearAll();
     }
 
     /**
      * Test to ensure that an unused graph.node is properly sorted out.
      */
-    @Test void unusedNodeTest() {
+    @Test
+    void unusedNodeTest() {
         Placeholder a = new Placeholder();
         Placeholder b = new Placeholder();
         Placeholder c = new Placeholder();

@@ -47,11 +47,13 @@ public class Addition extends Operation {
      * @param inputs the inputs of this graph.node, as tensors
      * @return the output of this graph.node, as a tensor
      */
-    @Override protected Tensor computeOutput(Tensor[] inputs) {
+    @Override
+    protected Tensor computeOutput(Tensor[] inputs) {
         return Operations.addition(inputs);
     }
 
-    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor deltas) {
+    @Override
+    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor deltas) {
         // the derivative of additions is one
         for (Node child : children) {
             gradients.put(child.getID(), Tensor.unbroadcast(deltas, Results.getOutput(child).getDimensions()));

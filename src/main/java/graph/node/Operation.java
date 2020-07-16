@@ -64,7 +64,8 @@ public abstract class Operation extends Node {
      *
      * @return the output of this graph.node, as a tensor
      */
-    @Override protected Tensor computeOutput() {
+    @Override
+    protected Tensor computeOutput() {
         return computeOutput(Arrays.stream(children).map(Results::getOutput).toArray(Tensor[]::new));
     }
 }

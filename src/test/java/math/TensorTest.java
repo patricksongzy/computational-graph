@@ -36,7 +36,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 class TensorTest {
 
-    @Test void broadcast() {
+    @Test
+    void broadcast() {
         Tensor t1 = Tensor.zeros(4, 3, 1);
         for (int i = 0; i < t1.getLength(); i++) {
             t1.getValues()[i] = i;
@@ -56,7 +57,8 @@ class TensorTest {
         assertThat(results).isEqualTo(expected);
     }
 
-    @Test void unbroadcast() {
+    @Test
+    void unbroadcast() {
         Tensor t1 = new Tensor.Builder(3, 1, 2).setValues(1, 2, 2, 3, 3, 4).build();
         Tensor t2 = new Tensor.Builder(3, 3, 1).setValues(1, 2, 3, 5, 2, 3, 8, 7, 9).build();
 
@@ -66,18 +68,21 @@ class TensorTest {
         assertThat(Tensor.unbroadcast(t1Broadcast, t1.getDimensions())).isEqualTo(expected);
     }
 
-    @Test void getFlattenedIndex() {
-        assertThat(Tensor.getFlattenedIndex(new int[] {3, 2}, new int[] {0, 0, 0, 2, 1})).isEqualTo(5);
+    @Test
+    void getFlattenedIndex() {
+        assertThat(Tensor.getFlattenedIndex(new int[]{3, 2}, new int[]{0, 0, 0, 2, 1})).isEqualTo(5);
     }
 
-    @Test void broadcastFailed() {
+    @Test
+    void broadcastFailed() {
         Tensor t1 = Tensor.zeros(3, 2);
         Tensor t2 = Tensor.zeros(3, 5);
 
         assertThatIllegalArgumentException().isThrownBy(() -> Tensor.broadcast(t1, t2));
     }
 
-    @Test void broadcastMulti() {
+    @Test
+    void broadcastMulti() {
         Tensor t1 = Tensor.zeros(4, 3, 1);
         for (int i = 0; i < t1.getLength(); i++) {
             t1.getValues()[i] = i;
@@ -104,21 +109,24 @@ class TensorTest {
         assertThat(results).isEqualTo(expected);
     }
 
-    @Test void dimensionsMatch() {
+    @Test
+    void dimensionsMatch() {
         Tensor t1 = Tensor.zeros(3, 8);
         Tensor t2 = Tensor.zeros(3, 8);
 
         assertThat(Tensor.isDimensionsMismatch(t1, t2)).isFalse();
     }
 
-    @Test void dimensionsMismatch() {
+    @Test
+    void dimensionsMismatch() {
         Tensor t1 = Tensor.zeros(3, 2, 1);
         Tensor t2 = Tensor.zeros(1, 5);
 
         assertThat(Tensor.isDimensionsMismatch(t1, t2)).isTrue();
     }
 
-    @Test void dimensionsMismatchLength() {
+    @Test
+    void dimensionsMismatchLength() {
         Tensor t1 = Tensor.zeros(3, 3, 3);
         Tensor t2 = Tensor.zeros(3, 3);
 
@@ -126,7 +134,8 @@ class TensorTest {
 
     }
 
-    @Test void get() {
+    @Test
+    void get() {
         Tensor t1 = Tensor.zeros(3, 2);
 
         for (int i = 0; i < t1.getLength(); i++) {
@@ -136,7 +145,8 @@ class TensorTest {
         assertThat(t1.get(1, 0)).isEqualTo(2);
     }
 
-    @Test void getAbsolute() {
+    @Test
+    void getAbsolute() {
         Tensor t1 = Tensor.zeros(3, 2);
 
         for (int i = 0; i < t1.getLength(); i++) {
@@ -146,24 +156,27 @@ class TensorTest {
         assertThat(t1.get(2)).isEqualTo(2);
     }
 
-    @Test void getBroadcastValue() {
+    @Test
+    void getBroadcastValue() {
         Tensor t1 = Tensor.zeros(5, 3);
 
         for (int i = 0; i < t1.getLength(); i++) {
             t1.getValues()[i] = i;
         }
 
-        assertThat(t1.getBroadcastedValue(new int[] {1, 5, 3}, new int[] {1, 2, 2})).isEqualTo(8);
+        assertThat(t1.getBroadcastedValue(new int[]{1, 5, 3}, new int[]{1, 2, 2})).isEqualTo(8);
     }
 
-    @Test void set() {
+    @Test
+    void set() {
         Tensor t1 = Tensor.zeros(3, 2);
         t1.set(5, 0, 1);
 
         assertThat(t1.get(0, 1)).isEqualTo(5);
     }
 
-    @Test void testToString() {
+    @Test
+    void testToString() {
         Tensor t1 = Tensor.zeros(2, 2, 2, 2);
 
         for (int i = 0; i < t1.getLength(); i++) {
@@ -178,8 +191,9 @@ class TensorTest {
         assertThat(t1.toString()).isEqualTo(expected);
     }
 
-    @Test void zeros() {
-        int[] dimensions = new int[] {2, 1, 3, 5, 8, 2};
+    @Test
+    void zeros() {
+        int[] dimensions = new int[]{2, 1, 3, 5, 8, 2};
         int product = 1;
         for (int dimension : dimensions) {
             product *= dimension;
