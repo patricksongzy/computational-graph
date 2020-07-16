@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
-package neural.graph.node;
+package graph.node;
 
-import neural.graph.node.leaves.Constant;
-import neural.graph.node.leaves.Placeholder;
-import neural.graph.node.operation.Addition;
-import neural.graph.node.operation.Multiplication;
-import neural.math.Tensor;
+import graph.node.leaves.Constant;
+import graph.node.leaves.Placeholder;
+import graph.node.operation.Addition;
+import graph.node.operation.Multiplication;
+import math.Tensor;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,12 +51,12 @@ class GraphTest {
         Graph.compute(null, c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
+        Assertions.assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
         assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(2, 2, 2).build());
     }
 
     /**
-     * Tests the gradient calculation of a specific node.
+     * Tests the gradient calculation of a specific graph.node.
      */
     @Test void executeNodeTest() {
         Placeholder a = new Placeholder();
@@ -183,7 +184,7 @@ class GraphTest {
     }
 
     /**
-     * Test to ensure that an unused node is properly sorted out.
+     * Test to ensure that an unused graph.node is properly sorted out.
      */
     @Test void unusedNodeTest() {
         Placeholder a = new Placeholder();

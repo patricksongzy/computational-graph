@@ -22,26 +22,49 @@
  * SOFTWARE.
  */
 
-package neural.graph.exception;
+package graph.node.leaves;
+
+import graph.node.Node;
+import math.Tensor;
 
 /**
- * A <code>NodeComputationException</code> is a <code>RuntimeException</code> which is thrown when
- * an error occurs during the computation of the graph.
+ * A <code>Constant</code> represents a graph.node whose value will not change during runtime.
  */
-@SuppressWarnings("unused") public class NodeComputationException extends RuntimeException {
+public class Constant extends Node {
 
-    public NodeComputationException() {
+    // the values of the constant
+    private final Tensor values;
+
+    /**
+     * Constructs a <code>Constant</code> graph.node from a tensor.
+     *
+     * @param values the tensor values of the constant
+     * @see Node#Node(Node...)
+     */
+    public Constant(Tensor values) {
+        super();
+
+        this.values = values;
     }
 
-    public NodeComputationException(String message) {
-        super(message);
+    /**
+     * Constructs a <code>Constant</code> graph.node, by creating a single-value tensor.
+     *
+     * @param value the value of the constant
+     * @see Node#Node(Node...)
+     */
+    public Constant(float value) {
+        super();
+
+        this.values = new Tensor.Builder(1).setValues(value).build();
     }
 
-    public NodeComputationException(Throwable cause) {
-        super(cause);
-    }
-
-    public NodeComputationException(String message, Throwable cause) {
-        super(message, cause);
+    /**
+     * Returns the constant as a tensor.
+     *
+     * @return the constant, as a tensor
+     */
+    @Override protected Tensor computeOutput() {
+        return values;
     }
 }

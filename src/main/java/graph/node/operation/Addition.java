@@ -22,44 +22,41 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.operation;
+package graph.node.operation;
 
-import neural.graph.node.Node;
-import neural.graph.node.Operation;
-import neural.graph.node.Results;
-import neural.math.Tensor;
+import graph.node.Node;
+import graph.node.Operation;
+import graph.node.Results;
+import math.Tensor;
 
 import java.util.Map;
 
 /**
- * A <code>Multiplication</code> node represents a node which applies an <b>element-wise</b>
- * multiplication operation to multiple tensors.
+ * An <code>Addition</code> graph.node represents a graph.node which applies an <b>element-wise</b> addition
+ * operation to multiple tensors.
  */
-public class Multiplication extends Operation {
+public class Addition extends Operation {
 
-    public Multiplication(Node... children) {
+    public Addition(Node... children) {
         super(children);
     }
 
-    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
-        for (Node child : children) {
-            Tensor gradient = Tensor.unbroadcast(
-                    Operations.multiplication(delta, Operations.division(Results.getOutput(this), Results.getOutput(child))),
-                    Results.getOutput(child).getDimensions());
+    /**
+     * Element-wise adds the inputted tensors, broadcasting them if necessary.
+     *
+     * @param inputs the inputs of this graph.node, as tensors
+     * @return the output of this graph.node, as a tensor
+     */
+    @Override protected Tensor computeOutput(Tensor[] inputs) {
+        return Operations.addition(inputs);
+    }
 
-            gradients.put(child.getID(), gradient);
+    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor deltas) {
+        // the derivative of additions is one
+        for (Node child : children) {
+            gradients.put(child.getID(), Tensor.unbroadcast(deltas, Results.getOutput(child).getDimensions()));
         }
 
         return gradients;
-    }
-
-    /**
-     * Element-wise multiplies the inputted tensors, broadcasting them if necessary.
-     *
-     * @param inputs the inputs of this node, as tensors
-     * @return the output of this node, as a tensor
-     */
-    @Override protected Tensor computeOutput(Tensor[] inputs) {
-        return Operations.multiplication(inputs);
     }
 }

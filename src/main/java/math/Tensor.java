@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-package neural.math;
+package math;
 
-import neural.graph.node.operation.Operations;
-import neural.math.blas.BLAS;
+import graph.node.operation.Operations;
+import math.blas.BLAS;
+import org.jocl.CL;
 import org.jocl.cl_mem;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A Tensor represents a n-dimensional matrix of a given node. It can be passed to any node and
+ * A Tensor represents a n-dimensional matrix of a given graph.node. It can be passed to any graph.node and
  * broadcasted to the expected shape.
  */
 public class Tensor {
@@ -63,6 +64,10 @@ public class Tensor {
     public cl_mem getBuffer(long flag) {
         buffer = BLAS.allocate(flag, values);
         return buffer;
+    }
+
+    public void releaseBuffer() {
+        CL.clReleaseMemObject(buffer);
     }
 
     /**

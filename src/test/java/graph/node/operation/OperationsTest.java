@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.operation;
+package graph.node.operation;
 
-import neural.math.Tensor;
+import math.Tensor;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ class OperationsTest {
 
         Tensor expected = new Tensor.Builder(3, 2).setValues(2, 4, 4, 6, 6, 8).build();
 
-        assertThat(Operations.addition(t1, t2)).isEqualTo(expected);
+        Assertions.assertThat(Operations.addition(t1, t2)).isEqualTo(expected);
     }
 
     @Test void multiplication() {

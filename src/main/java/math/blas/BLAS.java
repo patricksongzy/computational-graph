@@ -22,14 +22,11 @@
  * SOFTWARE.
  */
 
-package neural.math.blas;
+package math.blas;
 
 import org.jocl.*;
-import org.jocl.blast.CLBlast;
-import org.jocl.blast.CLBlastLayout;
 
 import static org.jocl.CL.*;
-import static org.jocl.blast.CLBlast.*;
 
 public class BLAS {
     private static cl_device_id device;

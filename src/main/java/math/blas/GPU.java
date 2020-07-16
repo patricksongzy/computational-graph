@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package neural.math.blas;
+package math.blas;
 
 import org.jocl.*;
 

@@ -22,30 +22,26 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.leaves;
-
-import neural.graph.node.Node;
-import neural.graph.node.Results;
-import neural.math.Tensor;
+package graph.exception;
 
 /**
- * A <code>Placeholder</code> represents a node whose value will be passed in when the graph is
- * executed.
+ * A <code>NodeComputationException</code> is a <code>RuntimeException</code> which is thrown when
+ * an error occurs during the computation of the graph.
  */
-public class Placeholder extends Node {
+@SuppressWarnings("unused") public class NodeComputationException extends RuntimeException {
 
-    public Placeholder() {
-        super();
+    public NodeComputationException() {
     }
 
-    /**
-     * Returns the value which was passed in when calling the computation of the graph, as a tensor,
-     * if it was inputted.
-     *
-     * @return the value which was passed in for this node, as a tensor
-     * @see Results#getOutput(Node)
-     */
-    @Override protected Tensor computeOutput() {
-        return Results.getOutput(this);
+    public NodeComputationException(String message) {
+        super(message);
+    }
+
+    public NodeComputationException(Throwable cause) {
+        super(cause);
+    }
+
+    public NodeComputationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

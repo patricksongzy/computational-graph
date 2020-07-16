@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package neural.math;
+package math;
 
 import org.junit.jupiter.api.Test;
 

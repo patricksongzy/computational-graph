@@ -22,24 +22,24 @@
  * SOFTWARE.
  */
 
-package neural.graph.node;
+package graph.node;
 
-import neural.math.Tensor;
+import math.Tensor;
 
 import java.util.Arrays;
 
 /**
- * An <code>Operation</code> represents a node which applies an operation to one or more inputs. <code>Operation</code> implements
+ * An <code>Operation</code> represents a graph.node which applies an operation to one or more inputs. <code>Operation</code> implements
  * <code>Callable</code>, as their results must be accessed as a <code>Future</code> list when called by an <code>ExecutorService</code>
- * to ensure that consumers have the required values to proceed before running. The <code>Operation</code> node must also implement a
+ * to ensure that consumers have the required values to proceed before running. The <code>Operation</code> graph.node must also implement a
  * differentiation method, which calculates its derivative.
  */
 public abstract class Operation extends Node {
 
     /**
-     * Constructs an <code>Operation</code> node, adding itself to the consumers of its children.
+     * Constructs an <code>Operation</code> graph.node, adding itself to the consumers of its children.
      *
-     * @param children the children of the node
+     * @param children the children of the graph.node
      * @see Node#Node(Node...)
      */
     protected Operation(Node... children) {
@@ -51,18 +51,18 @@ public abstract class Operation extends Node {
     }
 
     /**
-     * Computes the output of the node as a tensor, given the inputs of the node.
+     * Computes the output of the graph.node as a tensor, given the inputs of the graph.node.
      *
-     * @param inputs the inputs of this node, as tensors
-     * @return the output of this node, as a tensor
+     * @param inputs the inputs of this graph.node, as tensors
+     * @return the output of this graph.node, as a tensor
      */
     protected abstract Tensor computeOutput(Tensor[] inputs);
 
     /**
-     * Calls the method, which computes the output of the node, inputting the outputs of children
+     * Calls the method, which computes the output of the graph.node, inputting the outputs of children
      * nodes.
      *
-     * @return the output of this node, as a tensor
+     * @return the output of this graph.node, as a tensor
      */
     @Override protected Tensor computeOutput() {
         return computeOutput(Arrays.stream(children).map(Results::getOutput).toArray(Tensor[]::new));

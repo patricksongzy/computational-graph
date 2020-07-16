@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.operation;
+package graph.node.operation;
 
-import neural.math.Tensor;
+import math.Tensor;
 
 /**
  * <code>Operations</code> applies an operation to given tensor inputs, without adding the tensors to the computational graph.

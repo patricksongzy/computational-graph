@@ -22,49 +22,30 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.leaves;
+package graph.node.leaves;
 
-import neural.graph.node.Node;
-import neural.math.Tensor;
+import graph.node.Node;
+import graph.node.Results;
+import math.Tensor;
 
 /**
- * A <code>Constant</code> represents a node whose value will not change during runtime.
+ * A <code>Placeholder</code> represents a graph.node whose value will be passed in when the graph is
+ * executed.
  */
-public class Constant extends Node {
+public class Placeholder extends Node {
 
-    // the values of the constant
-    private final Tensor values;
-
-    /**
-     * Constructs a <code>Constant</code> node from a tensor.
-     *
-     * @param values the tensor values of the constant
-     * @see Node#Node(Node...)
-     */
-    public Constant(Tensor values) {
+    public Placeholder() {
         super();
-
-        this.values = values;
     }
 
     /**
-     * Constructs a <code>Constant</code> node, by creating a single-value tensor.
+     * Returns the value which was passed in when calling the computation of the graph, as a tensor,
+     * if it was inputted.
      *
-     * @param value the value of the constant
-     * @see Node#Node(Node...)
-     */
-    public Constant(float value) {
-        super();
-
-        this.values = new Tensor.Builder(1).setValues(value).build();
-    }
-
-    /**
-     * Returns the constant as a tensor.
-     *
-     * @return the constant, as a tensor
+     * @return the value which was passed in for this graph.node, as a tensor
+     * @see Results#getOutput(Node)
      */
     @Override protected Tensor computeOutput() {
-        return values;
+        return Results.getOutput(this);
     }
 }
