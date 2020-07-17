@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,49 +22,44 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.leaves;
+package graph.node.operation;
 
-import neural.graph.node.Node;
-import neural.math.Tensor;
+import graph.node.Node;
+import graph.node.Operation;
+import graph.node.Results;
+import math.Tensor;
+
+import java.util.Map;
 
 /**
- * A <code>Constant</code> represents a node whose value will not change during runtime.
+ * An <code>Addition</code> node represents a node which applies an <b>element-wise</b> addition
+ * operation to multiple tensors.
  */
-public class Constant extends Node {
+public class Addition extends Operation {
 
-    // the values of the constant
-    private final Tensor values;
-
-    /**
-     * Constructs a <code>Constant</code> node from a tensor.
-     *
-     * @param values the tensor values of the constant
-     * @see Node#Node(Node...)
-     */
-    public Constant(Tensor values) {
-        super();
-
-        this.values = values;
+    public Addition(Node... children) {
+        super(children);
     }
 
     /**
-     * Constructs a <code>Constant</code> node, by creating a single-value tensor.
+     * Element-wise adds the inputted tensors, broadcasting them if necessary.
      *
-     * @param value the value of the constant
-     * @see Node#Node(Node...)
+     * @param inputs the inputs of this node, as tensors
+     * @return the output of this node, as a tensor
      */
-    public Constant(float value) {
-        super();
-
-        this.values = new Tensor.Builder(1).setValues(value).build();
+    @Override
+    protected Tensor computeOutput(Tensor[] inputs) {
+        return Operations.addition(inputs);
     }
 
-    /**
-     * Returns the constant as a tensor.
-     *
-     * @return the constant, as a tensor
-     */
-    @Override protected Tensor computeOutput() {
-        return values;
+    @Override
+    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
+        // the derivative of additions is one
+        for (Node child : children) {
+            // unbroadcast the delta to the original input dimensions
+            gradients.put(child.getID(), Tensor.unbroadcast(delta, Results.getOutput(child).getDimensions()));
+        }
+
+        return gradients;
     }
 }

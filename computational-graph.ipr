@@ -98,7 +98,7 @@ under the License.
   <component name="ProjectModuleManager"> 
     <modules> 
       <!-- module filepath="$$PROJECT_DIR$$/${pom.artifactId}.iml"/ -->  
-      <module filepath="$PROJECT_DIR$/neural-computational-graph.iml"/>
+      <module filepath="$PROJECT_DIR$/computational-graph.iml"/>
     </modules> 
   </component>  
   <UsedPathMacros> 

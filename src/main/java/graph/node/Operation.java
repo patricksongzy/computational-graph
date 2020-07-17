@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package neural.graph.node;
+package graph.node;
 
-import neural.math.Tensor;
+import math.Tensor;
 
 import java.util.Arrays;
 
@@ -64,7 +64,8 @@ public abstract class Operation extends Node {
      *
      * @return the output of this node, as a tensor
      */
-    @Override protected Tensor computeOutput() {
+    @Override
+    protected Tensor computeOutput() {
         return computeOutput(Arrays.stream(children).map(Results::getOutput).toArray(Tensor[]::new));
     }
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,12 @@
  * SOFTWARE.
  */
 
-package neural.math;
+package math;
 
-import neural.graph.node.operation.Operations;
+import graph.node.operation.Operations;
+import math.blas.BLAS;
+import org.jocl.CL;
+import org.jocl.cl_mem;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -35,13 +38,15 @@ import java.util.stream.IntStream;
  * broadcasted to the expected shape.
  */
 public class Tensor {
-
     // the dimensions of the tensor in row-major
     private final int[] dimensions;
     // the length of the dimensions
     private final int length;
     // the values of the tensor
     private final float[] values;
+
+    // the GPU buffer for the tensor
+    private cl_mem buffer;
 
     /**
      * Constructs a Tensor from a builder object. This constructor is private, as all tensors must
@@ -130,7 +135,7 @@ public class Tensor {
     }
 
     /**
-     * Returns the indices for each dimension given an flattened (absolute) index.
+     * Returns the indices for each dimension given a flattened (absolute) index.
      *
      * @param dimensions the dimensions of the tensor
      * @param index      the flattened (absolute) index
@@ -164,7 +169,8 @@ public class Tensor {
      * @param indices    the indices for the individual dimensions
      * @return the flattened (absolute) index
      */
-    @SuppressWarnings("WeakerAccess") public static int getFlattenedIndex(int[] dimensions, int[] indices) {
+    @SuppressWarnings("WeakerAccess")
+    public static int getFlattenedIndex(int[] dimensions, int[] indices) {
         if (Arrays.stream(indices).anyMatch(i -> i < 0))
             throw new IllegalArgumentException("Index cannot be negative.");
 
@@ -200,13 +206,22 @@ public class Tensor {
         return Arrays.stream(tensors).map(Tensor::getDimensions).anyMatch(dim -> !Arrays.equals(dim, tensors[0].dimensions));
     }
 
+    /**
+     * Checks if the given indices are invalid, ignoring leading zeros.
+     *
+     * @param indices    the indices of the tensor
+     * @param dimensions the dimensions of the tensor
+     * @return whether the given indices are invalid
+     */
     private static boolean isIndicesInvalid(int[] indices, int[] dimensions) {
         if (indices.length < dimensions.length)
             return true;
 
         if (indices.length > dimensions.length) {
+            // extra indices are trimmed
             int difference = indices.length - dimensions.length;
 
+            // ensure the given indices are zeros
             for (int i = 0; i < difference; i++) {
                 if (indices[i] != 0)
                     return true;
@@ -216,6 +231,12 @@ public class Tensor {
         return false;
     }
 
+    /**
+     * Constructs a tensor filled with ones.
+     *
+     * @param dimensions the row-major dimensions of the tensor
+     * @return the tensor filled with ones
+     */
     public static Tensor ones(int... dimensions) {
         Tensor ones = new Tensor.Builder(dimensions).build();
         ones.fill(1);
@@ -223,6 +244,12 @@ public class Tensor {
         return ones;
     }
 
+    /**
+     * Trims the given dimensions, removing leading ones.
+     *
+     * @param dimensions the row-major dimensions of the tensor
+     * @return the trimmed row-major dimensions of the tensor
+     */
     private static int[] trimDimensions(int[] dimensions) {
         int leadingOnes = 0;
         for (int i = 0; i < dimensions.length; i++) {
@@ -238,7 +265,15 @@ public class Tensor {
         return trimmed;
     }
 
+    /**
+     * Unbroadcasts the given tensor by summing along the broadcasted dimensions.
+     *
+     * @param tensor                  the tensor to unbroadcast
+     * @param unbroadcastedDimensions the row-major dimensions of the unbroadcasted tensor
+     * @return the unbroadcasted tensor
+     */
     public static Tensor unbroadcast(Tensor tensor, int[] unbroadcastedDimensions) {
+        // find the dimensions which have been broadcasted
         int[] broadcastDimensions = IntStream.range(0, tensor.dimensions.length).filter(i -> {
             int broadcastIndex = tensor.dimensions.length - i - 1;
             int unbroadcastIndex = unbroadcastedDimensions.length - i - 1;
@@ -246,12 +281,14 @@ public class Tensor {
             if (unbroadcastIndex < 0)
                 return true;
 
+            // if the dimensions mismatch, they have been broadcasted
             return tensor.dimensions[broadcastIndex] != unbroadcastedDimensions[unbroadcastIndex];
         }).map(i -> tensor.dimensions.length - i - 1).toArray();
 
         if (broadcastDimensions.length == 0)
             return tensor;
 
+        // sum along the broadcasted dimensions
         return Operations.sum(tensor, broadcastDimensions);
     }
 
@@ -266,13 +303,61 @@ public class Tensor {
     }
 
     /**
+     * Retrieves the memory buffer, or allocates it if absent.
+     *
+     * @return the memory buffer
+     */
+    public cl_mem getBuffer(long flag) {
+        if (buffer == null)
+            allocateBuffer(flag);
+
+        return buffer;
+    }
+
+    /**
+     * Allocates a memory buffer, and stores it.
+     *
+     * @param flag the memory buffer flag
+     * @return the allocated memory buffer
+     */
+    public cl_mem allocateBuffer(long flag) {
+        buffer = BLAS.allocate(flag, values);
+        return buffer;
+    }
+
+    /**
+     * Updates the values of the tensor from reading its buffer.
+     */
+    public void readFromBuffer() {
+        float[] result = BLAS.readBuffer(buffer, length);
+        System.arraycopy(result, 0, values, 0, length);
+    }
+
+    /**
+     * Updates the memory buffer, releasing the current one if it is already set.
+     *
+     * @param buffer the memory buffer to set
+     */
+    public void setBuffer(cl_mem buffer) {
+        if (this.buffer != null)
+            releaseBuffer();
+
+        this.buffer = buffer;
+    }
+
+    public void releaseBuffer() {
+        BLAS.releaseBuffer(buffer);
+    }
+
+    /**
      * Checks if the dimensions and values of the tensor and another are equal, if the object
      * supplied is a tensor. Returns false if a tensor is not supplied.
      *
      * @param obj the other tensor
      * @return whether the two tensors are equal
      */
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         if (!(obj instanceof Tensor)) {
             return false;
         }
@@ -286,7 +371,8 @@ public class Tensor {
      *
      * @param values the values of the tensor.
      */
-    @SuppressWarnings({"unused", "WeakerAccess"}) public void fill(float... values) {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public void fill(float... values) {
         if (values.length == 1)
             Arrays.fill(this.values, values[0]);
         else if (values.length != this.values.length)
@@ -301,7 +387,8 @@ public class Tensor {
      * @param indices the indices for the individual dimensions
      * @return the value at the given indices
      */
-    @SuppressWarnings("WeakerAccess") public float get(int... indices) {
+    @SuppressWarnings("WeakerAccess")
+    public float get(int... indices) {
         return values[getFlattenedIndex(dimensions, indices)];
     }
 
@@ -377,7 +464,8 @@ public class Tensor {
      * @param value   the value to set
      * @param indices the indices for the individual dimensions
      */
-    @SuppressWarnings("WeakerAccess") public void set(float value, int... indices) {
+    @SuppressWarnings("WeakerAccess")
+    public void set(float value, int... indices) {
         if (isIndicesInvalid(indices, dimensions)) {
             throw new IllegalArgumentException(
                     String.format("Indices and dimensions do not match: '%d' != '%d'.", indices.length, dimensions.length));
@@ -400,7 +488,8 @@ public class Tensor {
         values[flattenedIndex] = value;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         // print the shape of the tensor
         StringBuilder result = new StringBuilder(String.format("<Tensor: shape=(%s)>",
                 Arrays.stream(dimensions).mapToObj(String::valueOf).collect(Collectors.joining(" x "))));

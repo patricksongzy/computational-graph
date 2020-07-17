@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,31 @@
  * SOFTWARE.
  */
 
-package neural.graph.exception;
+package graph.node.leaves;
+
+import graph.node.Node;
+import graph.node.Results;
+import math.Tensor;
 
 /**
- * A <code>NodeComputationException</code> is a <code>RuntimeException</code> which is thrown when
- * an error occurs during the computation of the graph.
+ * A <code>Placeholder</code> represents a node whose value will be passed in when the graph is
+ * executed.
  */
-@SuppressWarnings("unused") public class NodeComputationException extends RuntimeException {
+public class Placeholder extends Node {
 
-    public NodeComputationException() {
+    public Placeholder() {
+        super();
     }
 
-    public NodeComputationException(String message) {
-        super(message);
-    }
-
-    public NodeComputationException(Throwable cause) {
-        super(cause);
-    }
-
-    public NodeComputationException(String message, Throwable cause) {
-        super(message, cause);
+    /**
+     * Returns the value which was passed in when calling the computation of the graph, as a tensor,
+     * if it was inputted.
+     *
+     * @return the value which was passed in for this node, as a tensor
+     * @see Results#getOutput(Node)
+     */
+    @Override
+    protected Tensor computeOutput() {
+        return Results.getOutput(this);
     }
 }

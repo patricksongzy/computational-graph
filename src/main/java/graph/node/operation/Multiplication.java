@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package neural.graph.node.operation;
+package graph.node.operation;
 
-import neural.graph.node.Node;
-import neural.graph.node.Operation;
-import neural.graph.node.Results;
-import neural.math.Tensor;
+import graph.node.Node;
+import graph.node.Operation;
+import graph.node.Results;
+import math.Tensor;
 
 import java.util.Map;
 
@@ -41,25 +41,29 @@ public class Multiplication extends Operation {
         super(children);
     }
 
-    @Override protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
-        for (Node child : children) {
-            Tensor gradient = Tensor.unbroadcast(
-                    Operations.multiplication(delta, Operations.division(Results.getOutput(this), Results.getOutput(child))),
-                    Results.getOutput(child).getDimensions());
-
-            gradients.put(child.getID(), gradient);
-        }
-
-        return gradients;
-    }
-
     /**
      * Element-wise multiplies the inputted tensors, broadcasting them if necessary.
      *
      * @param inputs the inputs of this node, as tensors
      * @return the output of this node, as a tensor
      */
-    @Override protected Tensor computeOutput(Tensor[] inputs) {
+    @Override
+    protected Tensor computeOutput(Tensor[] inputs) {
         return Operations.multiplication(inputs);
+    }
+
+    @Override
+    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
+        // the derivative of multiplication is the product of all other factors
+        for (Node child : children) {
+            // instead of multiplying each other factor, we can divide this factor from the product
+            Tensor derivative = Operations.division(Results.getOutput(this), Results.getOutput(child));
+            // unbroadcast the delta to the original input dimensions
+            Tensor gradient = Tensor.unbroadcast(Operations.multiplication(delta, derivative), Results.getOutput(child).getDimensions());
+
+            gradients.put(child.getID(), gradient);
+        }
+
+        return gradients;
     }
 }

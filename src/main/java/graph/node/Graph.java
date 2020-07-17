@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Patrick Song
+ * Copyright (c) 2020 Patrick Song
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-package neural.graph.node;
+package graph.node;
 
-import neural.graph.exception.NodeComputationException;
-import neural.graph.node.leaves.Placeholder;
-import neural.math.Tensor;
+import graph.exception.NodeComputationException;
+import graph.node.leaves.Placeholder;
+import math.Tensor;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -36,7 +36,6 @@ import java.util.concurrent.*;
  * efficiency.
  */
 public class Graph {
-
     // the executor service is used to execute operations efficiently
     private static final ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     // a list of graphs which have been created
@@ -45,6 +44,8 @@ public class Graph {
     private static Graph current = new Graph();
 
     static {
+        System.out.println("Shutting down Executor Service.");
+
         // ensure the executor service shuts down
         Runtime.getRuntime().addShutdownHook(new Thread(es::shutdown));
     }
@@ -59,7 +60,8 @@ public class Graph {
     /**
      * Constructs a graph and adds it to the list of graphs.
      */
-    @SuppressWarnings("WeakerAccess") public Graph() {
+    @SuppressWarnings("WeakerAccess")
+    public Graph() {
         graphs.add(this);
     }
 
@@ -76,9 +78,11 @@ public class Graph {
     /**
      * Clears all graphs of nodes and creates a new default graph.
      */
-    @SuppressWarnings("WeakerAccess") public static void clearAll() {
+    @SuppressWarnings("WeakerAccess")
+    public static void clearAll() {
         graphs.clear();
         current = new Graph();
+        Results.clear();
     }
 
     /**
@@ -89,7 +93,8 @@ public class Graph {
      * @param placeholderMap the inputted placeholders
      * @param outputNodes    the nodes to compute
      */
-    @SuppressWarnings("WeakerAccess") public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... outputNodes) {
+    @SuppressWarnings("WeakerAccess")
+    public static void compute(Map<Placeholder, Tensor> placeholderMap, Node... outputNodes) {
         // if no nodes are computed, then return immediately
         if (outputNodes.length == 0) {
             return;
@@ -126,7 +131,6 @@ public class Graph {
             // ensure that all nodes have been computed
             Results.getAllOutputs();
         } catch (InterruptedException | ExecutionException e) {
-            es.shutdown();
             throw new NodeComputationException(e);
         }
     }
@@ -135,7 +139,7 @@ public class Graph {
      * Starts the computation of the gradient for a node on the graph, given whether it is an end node or not.
      *
      * @param currentNode the node to compute the gradients for
-     * @param isEndNode whether the node is an end node or not
+     * @param isEndNode   whether the node is an end node or not
      */
     private static void computeGradient(Node currentNode, boolean isEndNode) {
         if (currentNode instanceof Operation) {
@@ -167,7 +171,8 @@ public class Graph {
      *
      * @return the currently active graph
      */
-    @SuppressWarnings({"unused", "WeakerAccess"}) public static Graph getCurrent() {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public static Graph getCurrent() {
         return current;
     }
 
@@ -176,14 +181,16 @@ public class Graph {
      *
      * @return the default graph
      */
-    @SuppressWarnings("unused") public static Graph getDefault() {
+    @SuppressWarnings("unused")
+    public static Graph getDefault() {
         return graphs.get(0);
     }
 
     /**
      * Computes the gradient of all nodes which were computed when the graph was last run.
      */
-    @SuppressWarnings("WeakerAccess") public static void gradient() {
+    @SuppressWarnings("WeakerAccess")
+    public static void gradient() {
         // check if the graph was run
         if (current.computedNodes != null) {
             try {
@@ -262,7 +269,8 @@ public class Graph {
      *
      * @return this graph
      */
-    @SuppressWarnings("WeakerAccess") public Graph setCurrent() {
+    @SuppressWarnings("WeakerAccess")
+    public Graph setCurrent() {
         current = this;
 
         return this;
