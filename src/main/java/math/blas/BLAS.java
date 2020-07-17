@@ -27,12 +27,17 @@ package math.blas;
 import org.jocl.*;
 import org.jocl.blast.CLBlastLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.jocl.CL.*;
 import static org.jocl.blast.CLBlast.CLBlastSgemm;
 
 public class BLAS {
     private static final cl_context context;
     private static final cl_command_queue commandQueue;
+
+    private static final List<cl_mem> buffers = new ArrayList<>();
 
     static {
         int ret;
@@ -46,7 +51,11 @@ public class BLAS {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Releasing resources.");
-            System.out.println(String.format("Resources released with code %d.", GPU.releaseResources()));
+            for (cl_mem buffer : buffers) {
+                clReleaseMemObject(buffer);
+            }
+
+            GPU.releaseResources();
         }));
     }
 
@@ -67,9 +76,14 @@ public class BLAS {
         if (ret != CL_SUCCESS)
             System.exit(ret);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> clReleaseMemObject(buffer)));
+        buffers.add(buffer);
 
         return buffer;
+    }
+
+    public static void releaseBuffer(cl_mem buffer) {
+        buffers.remove(buffer);
+        clReleaseMemObject(buffer);
     }
 
     public static float[] readBuffer(cl_mem buffer, int length) {

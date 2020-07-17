@@ -346,7 +346,7 @@ public class Tensor {
     }
 
     public void releaseBuffer() {
-        CL.clReleaseMemObject(buffer);
+        BLAS.releaseBuffer(buffer);
     }
 
     /**

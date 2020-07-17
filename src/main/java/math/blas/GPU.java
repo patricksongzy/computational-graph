@@ -42,16 +42,9 @@ public class GPU {
         return commandQueue;
     }
 
-    static int releaseResources() {
-        int ret;
-
-        ret = clReleaseCommandQueue(commandQueue);
-        if (ret != CL_SUCCESS)
-            return ret;
-
-        ret = clReleaseContext(context);
-
-        return ret;
+    static void releaseResources() {
+        clReleaseCommandQueue(commandQueue);
+        clReleaseContext(context);
     }
 
     static int setupCL() {
