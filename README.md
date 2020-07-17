@@ -1,2 +1,2 @@
-# neural-computational-graph
-A Java neural network implementation from scratch using computational graphs.
+# computational-graph
+A GPU-parallel Java automatic differentiation computational graph implementation from scratch.
