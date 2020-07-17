@@ -37,18 +37,18 @@ import java.util.Map;
  * <code>Node</code> must have a unique identifier and must keep track of consumers and children.
  */
 public abstract class Node {
-    // the amount of nodes is used to uniquely identify each graph.node
+    // the amount of nodes is used to uniquely identify each node
     private static long nodeCount = 0;
-    // the children of the graph.node are used as its inputs
+    // the children of the node are used as its inputs
     protected final Node[] children;
     private final long nodeID = nodeCount++;
-    // the consumers of the graph.node use its output
+    // the consumers of the node use its output
     private final List<Operation> consumers = new ArrayList<>();
 
     /**
-     * Constructs a graph.node given its children, adding itself to the graph.
+     * Constructs a node given its children, adding itself to the graph.
      *
-     * @param children the children of the graph.node
+     * @param children the children of the node
      */
     protected Node(Node... children) {
         this.children = children;
@@ -57,12 +57,12 @@ public abstract class Node {
     }
 
     /**
-     * Computes the gradient of the graph.node. This method returns a map of gradients, as such gradient computation applies to the non-operation
+     * Computes the gradient of the node. This method returns a map of gradients, as such gradient computation applies to the non-operation
      * nodes. The map contains the gradients and their respective nodes. When calculating in reverse order, these nodes are the children
-     * nodes. In essence, the gradient is calculated with respect to the inputs of the graph.node.
+     * nodes. In essence, the gradient is calculated with respect to the inputs of the node.
      *
      * @param gradients the map of gradients and their respective nodes
-     * @param delta     the gradients with respect to the output of the graph.node
+     * @param delta     the gradients with respect to the output of the node
      * @return the map of gradients and respective nodes
      */
     protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
@@ -70,11 +70,11 @@ public abstract class Node {
     }
 
     /**
-     * Computes the gradient of the graph.node. This method takes the delta as a sum of incoming deltas, or as a tensor of ones, depending on
-     * whether it is an output graph.node, then calls the {@link Node#computeGradients(Map, Tensor)} method to compute the gradients, returning
+     * Computes the gradient of the node. This method takes the delta as a sum of incoming deltas, or as a tensor of ones, depending on
+     * whether it is an output node, then calls the {@link Node#computeGradients(Map, Tensor)} method to compute the gradients, returning
      * the result.
      *
-     * @param isEndNode whether the graph.node is an end graph.node or not
+     * @param isEndNode whether the node is an end node or not
      * @return the map of gradients and respective nodes
      */
     Map<Long, Tensor> computeGradients(boolean isEndNode) {
@@ -93,23 +93,23 @@ public abstract class Node {
     }
 
     /**
-     * Returns the output of the graph.node as a tensor.
+     * Returns the output of the node as a tensor.
      *
-     * @return the output of the graph.node
+     * @return the output of the node
      */
     protected abstract Tensor computeOutput();
 
     /**
-     * Returns the consumers of the graph.node. Consumers use the output of a graph.node as an input.
+     * Returns the consumers of the node. Consumers use the output of a node as an input.
      *
-     * @return the consumers of the graph.node
+     * @return the consumers of the node
      */
     List<Operation> getConsumers() {
         return consumers;
     }
 
     /**
-     * Returns the unique identifier for the graph.node.
+     * Returns the unique identifier for the node.
      *
      * @return the unique identifier
      */

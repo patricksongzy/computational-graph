@@ -58,7 +58,7 @@ class GraphTest {
     }
 
     /**
-     * Tests the gradient calculation of a specific graph.node.
+     * Tests the gradient calculation of a specific node.
      */
     @Test
     void executeNodeTest() {
@@ -192,7 +192,7 @@ class GraphTest {
     }
 
     /**
-     * Test to ensure that an unused graph.node is properly sorted out.
+     * Test to ensure that an unused node is properly sorted out.
      */
     @Test
     void unusedNodeTest() {

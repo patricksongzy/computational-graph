@@ -32,7 +32,7 @@ import math.Tensor;
 import java.util.Map;
 
 /**
- * A <code>Multiplication</code> graph.node represents a graph.node which applies an <b>element-wise</b>
+ * A <code>Multiplication</code> node represents a node which applies an <b>element-wise</b>
  * multiplication operation to multiple tensors.
  */
 public class Multiplication extends Operation {
@@ -44,8 +44,8 @@ public class Multiplication extends Operation {
     /**
      * Element-wise multiplies the inputted tensors, broadcasting them if necessary.
      *
-     * @param inputs the inputs of this graph.node, as tensors
-     * @return the output of this graph.node, as a tensor
+     * @param inputs the inputs of this node, as tensors
+     * @return the output of this node, as a tensor
      */
     @Override
     protected Tensor computeOutput(Tensor[] inputs) {

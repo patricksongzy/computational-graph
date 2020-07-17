@@ -31,21 +31,27 @@ import java.util.Scanner;
 import static org.jocl.CL.*;
 
 public class GPU {
-    private static cl_device_id device;
-
     private static cl_context context;
-    private static cl_command_queue command_queue;
-
-    static cl_device_id getDevice() {
-        return device;
-    }
+    private static cl_command_queue commandQueue;
 
     static cl_context getContext() {
         return context;
     }
 
     static cl_command_queue getCommandQueue() {
-        return command_queue;
+        return commandQueue;
+    }
+
+    static int releaseResources() {
+        int ret;
+
+        ret = clReleaseCommandQueue(commandQueue);
+        if (ret != CL_SUCCESS)
+            return ret;
+
+        ret = clReleaseContext(context);
+
+        return ret;
     }
 
     static int setupCL() {
@@ -120,18 +126,16 @@ public class GPU {
         deviceIndex = devices.length == 1 ? 0 : getChoice("device index", devices.length - 1);
         System.out.println(String.format("Using device %d.", deviceIndex));
 
-        device = devices[deviceIndex];
-
         cl_context_properties properties = new cl_context_properties();
         properties.addProperty(CL_CONTEXT_PLATFORM, platforms[platformIndex]);
 
         int[] retPointer = new int[1];
-        context = clCreateContext(properties, 1, new cl_device_id[]{device}, null, null, retPointer);
+        context = clCreateContext(properties, 1, new cl_device_id[]{devices[deviceIndex]}, null, null, retPointer);
         ret = retPointer[0];
         if (ret != CL_SUCCESS)
             return ret;
 
-        command_queue = clCreateCommandQueueWithProperties(context, device, null, retPointer);
+        commandQueue = clCreateCommandQueueWithProperties(context, devices[deviceIndex], null, retPointer);
         ret = retPointer[0];
         if (ret != CL_SUCCESS)
             clReleaseContext(context);

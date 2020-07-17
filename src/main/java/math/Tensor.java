@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A Tensor represents a n-dimensional matrix of a given graph.node. It can be passed to any graph.node and
+ * A Tensor represents a n-dimensional matrix of a given node. It can be passed to any node and
  * broadcasted to the expected shape.
  */
 public class Tensor {

@@ -28,7 +28,7 @@ import graph.node.Node;
 import math.Tensor;
 
 /**
- * A <code>Constant</code> represents a graph.node whose value will not change during runtime.
+ * A <code>Constant</code> represents a node whose value will not change during runtime.
  */
 public class Constant extends Node {
 
@@ -36,7 +36,7 @@ public class Constant extends Node {
     private final Tensor values;
 
     /**
-     * Constructs a <code>Constant</code> graph.node from a tensor.
+     * Constructs a <code>Constant</code> node from a tensor.
      *
      * @param values the tensor values of the constant
      * @see Node#Node(Node...)
@@ -48,7 +48,7 @@ public class Constant extends Node {
     }
 
     /**
-     * Constructs a <code>Constant</code> graph.node, by creating a single-value tensor.
+     * Constructs a <code>Constant</code> node, by creating a single-value tensor.
      *
      * @param value the value of the constant
      * @see Node#Node(Node...)

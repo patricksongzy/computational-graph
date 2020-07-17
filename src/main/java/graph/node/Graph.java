@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * A <code>Graph</code> represents a computational graph. It is used to calculate a graph.node, and its gradient. Graphs are sorted to maximise
+ * A <code>Graph</code> represents a computational graph. It is used to calculate a node, and its gradient. Graphs are sorted to maximise
  * efficiency.
  */
 public class Graph {
@@ -66,9 +66,9 @@ public class Graph {
     }
 
     /**
-     * Adds a graph.node to the graph, so it can be tracked an run easily.
+     * Adds a node to the graph, so it can be tracked an run easily.
      *
-     * @param node the graph.node to add
+     * @param node the node to add
      */
     static void addNode(Node node) {
         current.nodes.add(node);
@@ -136,10 +136,10 @@ public class Graph {
     }
 
     /**
-     * Starts the computation of the gradient for a graph.node on the graph, given whether it is an end graph.node or not.
+     * Starts the computation of the gradient for a node on the graph, given whether it is an end node or not.
      *
-     * @param currentNode the graph.node to compute the gradients for
-     * @param isEndNode   whether the graph.node is an end graph.node or not
+     * @param currentNode the node to compute the gradients for
+     * @param isEndNode   whether the node is an end node or not
      */
     private static void computeGradient(Node currentNode, boolean isEndNode) {
         if (currentNode instanceof Operation) {
@@ -219,9 +219,9 @@ public class Graph {
 
     /**
      * Populates a set of discoverable nodes for the topological sort, by adding all descendants of
-     * a specific graph.node to the set.
+     * a specific node to the set.
      *
-     * @param current      the graph.node to add descendants from
+     * @param current      the node to add descendants from
      * @param discoverable the set of discoverable nodes for the topological sort
      */
     private static void populateDiscoverable(Node current, Set<Node> discoverable) {
@@ -234,33 +234,33 @@ public class Graph {
     }
 
     /**
-     * Visits a graph.node, by recursively visiting its descendants, then adding itself to the sorted
-     * nodes. This ensures that a graph.node's descendants are placed before the graph.node in the sorted
+     * Visits a node, by recursively visiting its descendants, then adding itself to the sorted
+     * nodes. This ensures that a node's descendants are placed before the node in the sorted
      * dequeue.
      *
-     * @param node         the current graph.node which is being visited
+     * @param node         the current node which is being visited
      * @param discoverable the set of discoverable nodes
      * @param sorted       the sorted graph
      */
     private static void visit(Node node, Set<Node> discoverable, Deque<Node> sorted) {
-        // check if the graph.node has already been visited and added to the graph
+        // check if the node has already been visited and added to the graph
         if (sorted.contains(node)) {
             return;
         }
 
-        // if the graph.node is not discoverable, the graph is not directed
+        // if the node is not discoverable, the graph is not directed
         if (!discoverable.contains(node)) {
             throw new IllegalArgumentException("Unable to sort the graph. Graph is not directed.");
         }
 
-        // remove the graph.node from the discoverable nodes
+        // remove the node from the discoverable nodes
         discoverable.remove(node);
-        // visit the graph.node's ancestors recursively
+        // visit the node's ancestors recursively
         for (Node child : node.children) {
             visit(child, discoverable, sorted);
         }
 
-        // add the graph.node to the sorted graph
+        // add the node to the sorted graph
         sorted.push(node);
     }
 
@@ -307,7 +307,7 @@ public class Graph {
         // the distances from the end nodes, where more negative values are considered farther
         Map<Node, Integer> distances = new HashMap<>();
         for (Node node : topological) {
-            // because the graph is topologically sorted, the distance can be increased by traversing from end graph.node to start
+            // because the graph is topologically sorted, the distance can be increased by traversing from end node to start
             distances.put(node, node.getConsumers().stream().mapToInt(consumer -> distances.getOrDefault(consumer, 1) - 1).min().orElse(0));
         }
 

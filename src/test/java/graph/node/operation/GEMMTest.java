@@ -126,8 +126,8 @@ class GEMMTest {
         Graph.compute(null, c);
         Graph.gradient();
 
-        System.out.println(Results.getGradient(a));
-        System.out.println(Results.getGradient(b));
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
     }
 
     /**
@@ -143,8 +143,42 @@ class GEMMTest {
         Graph.compute(null, c);
         Graph.gradient();
 
-        System.out.println(Results.getGradient(a));
-        System.out.println(Results.getGradient(b));
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
+    }
+
+    /**
+     * Tests the gradient calculation for matrix multiplication on the GPU, when B is transposed.
+     */
+    @Test
+    void gemmGradientTransposeTestB() {
+        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+
+        GEMM c = new GEMM(false, true, a, b);
+
+        Graph.compute(null, c);
+        Graph.gradient();
+
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
+    }
+
+    /**
+     * Tests the gradient calculation for matrix multiplication on the GPU, when A, and B are transposed.
+     */
+    @Test
+    void gemmGradientTransposeTestAB() {
+        Constant a = new Constant(new Tensor.Builder(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
+        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+
+        GEMM c = new GEMM(true, true, a, b);
+
+        Graph.compute(null, c);
+        Graph.gradient();
+
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
     }
 
     /**

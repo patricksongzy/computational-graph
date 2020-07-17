@@ -32,14 +32,13 @@ import math.blas.BLAS;
 import org.jocl.CL;
 import org.jocl.cl_mem;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static org.jocl.blast.CLBlastTranspose.CLBlastTransposeNo;
 import static org.jocl.blast.CLBlastTranspose.CLBlastTransposeYes;
 
 /**
- * A <code>GEMM</code> graph.node represents a graph.node which applies a matrix multiplication
+ * A <code>GEMM</code> node represents a node which applies a matrix multiplication
  * operation to two tensors.
  */
 public class GEMM extends Operation {
@@ -76,11 +75,11 @@ public class GEMM extends Operation {
         if (bTranspose) {
             n = bDimensions[0];
             if (k != bDimensions[1])
-                throw new IllegalArgumentException(String.format("Incompatible k-dimension: '%s' != '%s'.", k, bDimensions[1]));
+                throw new IllegalArgumentException(String.format("Incompatible k-dimension: %s != %s.", k, bDimensions[1]));
         } else {
             n = bDimensions[1];
             if (k != bDimensions[0])
-                throw new IllegalArgumentException(String.format("Incompatible k-dimension: '%s' != '%s'.", k, bDimensions[0]));
+                throw new IllegalArgumentException(String.format("Incompatible k-dimension: %s != %s.", k, bDimensions[0]));
         }
 
         return new int[]{m, n, k};
@@ -121,7 +120,7 @@ public class GEMM extends Operation {
         Tensor a = Results.getOutput(children[0]);
         Tensor b = Results.getOutput(children[1]);
 
-       int[] aDimensions = a.getDimensions();
+        int[] aDimensions = a.getDimensions();
         int[] bDimensions = b.getDimensions();
 
         int[] mnk = extractDimensions(aDimensions, bDimensions);
@@ -149,11 +148,19 @@ public class GEMM extends Operation {
         cl_mem dABuffer = dA.allocateBuffer(CL.CL_MEM_READ_WRITE);
         cl_mem dBBuffer = dB.allocateBuffer(CL.CL_MEM_READ_WRITE);
 
-        BLAS.sgemm(deltaBuffer, bBuffer, dABuffer, CLBlastTransposeNo, bTranspose ? CLBlastTransposeNo : CLBlastTransposeYes, m, k, n, n, n, k);
+        if (aTranspose) {
+            BLAS.sgemm(bBuffer, deltaBuffer, dABuffer, bTranspose ? CLBlastTransposeYes : CLBlastTransposeNo, CLBlastTransposeYes, k, m, n, bTranspose ? k : n, n, m);
+        } else {
+            BLAS.sgemm(deltaBuffer, bBuffer, dABuffer, CLBlastTransposeNo, bTranspose ? CLBlastTransposeNo : CLBlastTransposeYes, m, k, n, n, bTranspose ? k : n, k);
+        }
+
+        if (bTranspose) {
+            BLAS.sgemm(deltaBuffer, aBuffer, dBBuffer, CLBlastTransposeYes, aTranspose ? CLBlastTransposeYes : CLBlastTransposeNo, n, k, m, n, aTranspose ? m : k, k);
+        } else {
+            BLAS.sgemm(aBuffer, deltaBuffer, dBBuffer, aTranspose ? CLBlastTransposeNo : CLBlastTransposeYes, CLBlastTransposeNo, k, n, m, aTranspose ? m : k, n, n);
+        }
 
         dA.readFromBuffer();
-        BLAS.sgemm(aBuffer, deltaBuffer, dBBuffer, aTranspose ? CLBlastTransposeNo : CLBlastTransposeYes, CLBlastTransposeNo, k, n, m, k, n, n);
-
         dB.readFromBuffer();
 
         dA.releaseBuffer();

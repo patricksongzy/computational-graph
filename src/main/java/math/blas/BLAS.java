@@ -31,8 +31,6 @@ import static org.jocl.CL.*;
 import static org.jocl.blast.CLBlast.CLBlastSgemm;
 
 public class BLAS {
-    private static final cl_device_id device;
-
     private static final cl_context context;
     private static final cl_command_queue commandQueue;
 
@@ -43,14 +41,12 @@ public class BLAS {
         if (ret != CL_SUCCESS)
             System.exit(ret);
 
-        device = GPU.getDevice();
         context = GPU.getContext();
         commandQueue = GPU.getCommandQueue();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Releasing resources.");
-            clReleaseCommandQueue(commandQueue);
-            clReleaseContext(context);
+            System.out.println(String.format("Resources released with code %d.", GPU.releaseResources()));
         }));
     }
 

@@ -29,7 +29,7 @@ import graph.node.Results;
 import math.Tensor;
 
 /**
- * A <code>Placeholder</code> represents a graph.node whose value will be passed in when the graph is
+ * A <code>Placeholder</code> represents a node whose value will be passed in when the graph is
  * executed.
  */
 public class Placeholder extends Node {
@@ -42,7 +42,7 @@ public class Placeholder extends Node {
      * Returns the value which was passed in when calling the computation of the graph, as a tensor,
      * if it was inputted.
      *
-     * @return the value which was passed in for this graph.node, as a tensor
+     * @return the value which was passed in for this node, as a tensor
      * @see Results#getOutput(Node)
      */
     @Override

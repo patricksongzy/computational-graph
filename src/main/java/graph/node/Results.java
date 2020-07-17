@@ -34,10 +34,10 @@ import java.util.concurrent.Future;
 
 /**
  * The <code>Results</code> represents a map of the results of all computational graphs, stored by
- * graph.node ID.
+ * node ID.
  */
 public class Results {
-    // the results are stored based on graph.node ID
+    // the results are stored based on node ID
     private static final Map<Long, Future<Tensor>> results = new HashMap<>();
     private static final Map<Long, Tensor> nodeGradients = new HashMap<>();
     private static final Map<Long, Future<Map<Long, Tensor>>> computedGradients = new HashMap<>();
@@ -51,12 +51,12 @@ public class Results {
     }
 
     /**
-     * Gets a stored result from the given map of a graph.node and of some generic.
+     * Gets a stored result from the given map of a node and of some generic.
      *
      * @param map  the map to get the result from
-     * @param node the graph.node in whose value to store
+     * @param node the node in whose value to store
      * @param <T>  the generic value of the map
-     * @return the generic value of the map given the graph.node
+     * @return the generic value of the map given the node
      */
     private static <T> T get(Map<Long, Future<T>> map, Node node) {
         try {
@@ -97,27 +97,27 @@ public class Results {
     }
 
     /**
-     * Gets a gradient computed by the given parent graph.node for the child graph.node's output.
+     * Gets a gradient computed by the given parent node for the child node's output.
      *
-     * @param parent the parent graph.node which computed the gradient
-     * @param child  the child graph.node which the gradient was computed for
-     * @return the gradient of the child graph.node's output
+     * @param parent the parent node which computed the gradient
+     * @param child  the child node which the gradient was computed for
+     * @return the gradient of the child node's output
      */
     static Tensor getComputedGradients(Node parent, Node child) {
         Tensor gradient = get(computedGradients, parent).get(child.getID());
 
         if (gradient == null)
             throw new IllegalArgumentException(
-                    String.format("Attempting to retrieve null value from '%d', for graph.node '%d'.", parent.getID(), child.getID()));
+                    String.format("Attempting to retrieve null value from node %d, for node %d.", parent.getID(), child.getID()));
 
         return gradient;
     }
 
     /**
-     * Gets the gradient for the given graph.node.
+     * Gets the gradient for the given node.
      *
-     * @param node the graph.node whose gradient to retrieve
-     * @return the gradient of the given graph.node
+     * @param node the node whose gradient to retrieve
+     * @return the gradient of the given node
      */
     @SuppressWarnings("WeakerAccess")
     public static Tensor getGradient(Node node) {
@@ -125,10 +125,10 @@ public class Results {
     }
 
     /**
-     * Gets the output of a graph.node.
+     * Gets the output of a node.
      *
-     * @param node the graph.node whose output to get
-     * @return the output of the graph.node
+     * @param node the node whose output to get
+     * @return the output of the node
      * @throws IllegalArgumentException if attempting to retrieve a value which does not exist or
      *                                  has not yet been computed
      */
@@ -137,10 +137,10 @@ public class Results {
     }
 
     /**
-     * Puts a value to the given map of a graph.node and future of some generic.
+     * Puts a value to the given map of a node and future of some generic.
      *
      * @param map   the map to put the future to
-     * @param node  the graph.node whose future to store
+     * @param node  the node whose future to store
      * @param value the value of the future
      * @param <T>   the generic of the future
      */
@@ -151,7 +151,7 @@ public class Results {
     /**
      * Puts a gradient to the computed gradients.
      *
-     * @param node  the graph.node whose gradient to store
+     * @param node  the node whose gradient to store
      * @param value the future for the computed gradient
      */
     static void putGradient(Node node, Future<Map<Long, Tensor>> value) {
@@ -159,10 +159,10 @@ public class Results {
     }
 
     /**
-     * Adds the output of a graph.node, alongside with the respective ID to the results.
+     * Adds the output of a node, alongside with the respective ID to the results.
      *
-     * @param node  the graph.node whose output to store
-     * @param value the future for the output of the graph.node
+     * @param node  the node whose output to store
+     * @param value the future for the output of the node
      */
     static void putOutput(Node node, Future<Tensor> value) {
         put(results, node, value);
