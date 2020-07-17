@@ -53,10 +53,11 @@ public class Addition extends Operation {
     }
 
     @Override
-    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor deltas) {
+    protected Map<Long, Tensor> computeGradients(Map<Long, Tensor> gradients, Tensor delta) {
         // the derivative of additions is one
         for (Node child : children) {
-            gradients.put(child.getID(), Tensor.unbroadcast(deltas, Results.getOutput(child).getDimensions()));
+            // unbroadcast the delta to the original input dimensions
+            gradients.put(child.getID(), Tensor.unbroadcast(delta, Results.getOutput(child).getDimensions()));
         }
 
         return gradients;

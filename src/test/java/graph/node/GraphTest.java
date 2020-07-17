@@ -30,7 +30,6 @@ import graph.node.operation.Addition;
 import graph.node.operation.GEMM;
 import graph.node.operation.Multiplication;
 import math.Tensor;
-import org.jocl.blast.CLBlastTranspose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,20 +39,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphTest {
-    /**
-     * Tests the matrix multiplication on the GPU.
-     */
-    @Test
-    void gemmTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
-
-        GEMM c = new GEMM(CLBlastTranspose.CLBlastTransposeNo, CLBlastTranspose.CLBlastTransposeNo, a, b);
-
-        Graph.compute(null, c);
-
-        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
-    }
 
     /**
      * Tests the gradient calculation from addition of tensors with compatible, but non-matching dimensions.

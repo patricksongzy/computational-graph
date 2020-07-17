@@ -44,6 +44,8 @@ public class Graph {
     private static Graph current = new Graph();
 
     static {
+        System.out.println("Shutting down Executor Service.");
+
         // ensure the executor service shuts down
         Runtime.getRuntime().addShutdownHook(new Thread(es::shutdown));
     }
@@ -80,6 +82,7 @@ public class Graph {
     public static void clearAll() {
         graphs.clear();
         current = new Graph();
+        Results.clear();
     }
 
     /**
@@ -128,7 +131,6 @@ public class Graph {
             // ensure that all nodes have been computed
             Results.getAllOutputs();
         } catch (InterruptedException | ExecutionException e) {
-            es.shutdown();
             throw new NodeComputationException(e);
         }
     }

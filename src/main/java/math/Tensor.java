@@ -303,11 +303,14 @@ public class Tensor {
     }
 
     /**
-     * Retrieves the memory buffer.
+     * Retrieves the memory buffer, or allocates it if absent.
      *
      * @return the memory buffer
      */
-    public cl_mem getBuffer() {
+    public cl_mem getBuffer(long flag) {
+        if (buffer == null)
+            allocateBuffer(flag);
+
         return buffer;
     }
 
