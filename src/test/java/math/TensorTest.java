@@ -28,7 +28,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -189,6 +191,36 @@ class TensorTest {
         String expected = br.lines().collect(Collectors.joining("\n"));
 
         assertThat(t1.toString()).isEqualTo(expected);
+    }
+
+    @Test
+    void equalsTest() {
+        Tensor t1 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t2 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t3 = new Tensor.Builder(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t4 = new Tensor.Builder(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
+
+        assertThat(t1.equals(t2)).isEqualTo(true);
+        assertThat(t1.equals(t3)).isEqualTo(false);
+        assertThat(t1.equals(t4)).isEqualTo(false);
+        assertThat(t3.equals(t4)).isEqualTo(false);
+    }
+
+    @Test
+    void hashCodeTest() {
+        Tensor t1 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t2 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t3 = new Tensor.Builder(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t4 = new Tensor.Builder(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
+
+        Set<Integer> codes = new HashSet<>();
+        codes.add(t1.hashCode());
+        codes.add(t3.hashCode());
+        codes.add(t4.hashCode());
+
+        assertThat(codes.size()).isEqualTo(3);
+
+        assertThat(t1.hashCode()).isEqualTo(t2.hashCode());
     }
 
     @Test

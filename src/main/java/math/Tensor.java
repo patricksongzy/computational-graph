@@ -26,10 +26,10 @@ package math;
 
 import graph.node.operation.Operations;
 import math.blas.BLAS;
-import org.jocl.CL;
 import org.jocl.cl_mem;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -305,6 +305,7 @@ public class Tensor {
     /**
      * Retrieves the memory buffer, or allocates it if absent.
      *
+     * @param flag the access flag for the allocated buffer
      * @return the memory buffer
      */
     public cl_mem getBuffer(long flag) {
@@ -347,6 +348,11 @@ public class Tensor {
 
     public void releaseBuffer() {
         BLAS.releaseBuffer(buffer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.deepHashCode(Arrays.stream(dimensions).boxed().toArray()), Arrays.deepHashCode(IntStream.range(0, values.length).mapToDouble(i -> values[i]).boxed().toArray()));
     }
 
     /**
