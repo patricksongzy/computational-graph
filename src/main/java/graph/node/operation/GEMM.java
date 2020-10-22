@@ -96,7 +96,7 @@ public class GEMM extends Operation {
         cl_mem aBuffer = inputs[0].getBuffer(CL.CL_MEM_READ_ONLY);
         cl_mem bBuffer = inputs[1].getBuffer(CL.CL_MEM_READ_ONLY);
 
-        Tensor c = new Tensor.Builder(m, n).build();
+        Tensor c = new Tensor.Builder().setDimensions(m, n).build();
         cl_mem cBuffer = c.allocateBuffer(CL.CL_MEM_READ_WRITE);
 
         int ldaLength = this.lda == Dimension.K ? k : m;
@@ -142,8 +142,8 @@ public class GEMM extends Operation {
         cl_mem bBuffer = b.allocateBuffer(CL.CL_MEM_READ_ONLY);
         cl_mem deltaBuffer = delta.allocateBuffer(CL.CL_MEM_READ_ONLY);
 
-        Tensor dA = new Tensor.Builder(a.getDimensions()).build();
-        Tensor dB = new Tensor.Builder(b.getDimensions()).build();
+        Tensor dA = new Tensor.Builder().setDimensions(a.getDimensions()).build();
+        Tensor dB = new Tensor.Builder().setDimensions(b.getDimensions()).build();
 
         cl_mem dABuffer = dA.allocateBuffer(CL.CL_MEM_READ_WRITE);
         cl_mem dBBuffer = dB.allocateBuffer(CL.CL_MEM_READ_WRITE);

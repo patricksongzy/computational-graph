@@ -27,7 +27,6 @@ package graph.node;
 import graph.node.leaves.Constant;
 import graph.node.leaves.Placeholder;
 import graph.node.operation.Addition;
-import graph.node.operation.GEMM;
 import graph.node.operation.Multiplication;
 import math.Tensor;
 import org.junit.jupiter.api.AfterEach;
@@ -45,16 +44,16 @@ class GraphTest {
      */
     @Test
     void addBroadcastGradientsTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
-        Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(1, 3).setValues(3, 2, 1).build());
 
         Addition c = new Addition(a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(2, 2, 2).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(2, 3).setValues(1, 1, 1, 1, 1, 1).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(1, 3).setValues(2, 2, 2).build());
     }
 
     /**
@@ -67,16 +66,16 @@ class GraphTest {
         Placeholder c = new Placeholder();
 
         Map<Placeholder, Tensor> placeholderMap = new HashMap<>();
-        placeholderMap.put(a, new Tensor.Builder(1).setValues(2).build());
-        placeholderMap.put(b, new Tensor.Builder(3).setValues(1, 5, 6).build());
-        placeholderMap.put(c, new Tensor.Builder(3).setValues(3, 2, 8).build());
+        placeholderMap.put(a, new Tensor.Builder().setDimensions(1).setValues(2).build());
+        placeholderMap.put(b, new Tensor.Builder().setDimensions(3).setValues(1, 5, 6).build());
+        placeholderMap.put(c, new Tensor.Builder().setDimensions(3).setValues(3, 2, 8).build());
 
         Addition d = new Addition(a, a);
         Multiplication e = new Multiplication(a, b, d);
 
         Graph.compute(placeholderMap, e);
 
-        Tensor expected = new Tensor.Builder(3).setValues(8, 40, 48).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3).setValues(8, 40, 48).build();
         assertThat(Results.getOutput(e)).isEqualTo(expected);
     }
 
@@ -94,7 +93,7 @@ class GraphTest {
 
         Multiplication e = new Multiplication(c, d);
 
-        Graph.compute(null, e);
+        Graph.compute(e);
 
         Graph.gradient();
 
@@ -112,9 +111,9 @@ class GraphTest {
         Placeholder c = new Placeholder();
 
         Map<Placeholder, Tensor> placeholderMap = new HashMap<>();
-        placeholderMap.put(a, new Tensor.Builder(1).setValues(2).build());
-        placeholderMap.put(b, new Tensor.Builder(3).setValues(1, 5, 6).build());
-        placeholderMap.put(c, new Tensor.Builder(3).setValues(3, 2, 8).build());
+        placeholderMap.put(a, new Tensor.Builder().setDimensions(1).setValues(2).build());
+        placeholderMap.put(b, new Tensor.Builder().setDimensions(3).setValues(1, 5, 6).build());
+        placeholderMap.put(c, new Tensor.Builder().setDimensions(3).setValues(3, 2, 8).build());
 
         Addition d = new Addition(a, a);
         Multiplication e = new Multiplication(a, b, d);
@@ -144,7 +143,7 @@ class GraphTest {
         // pd * pf * (pe + pf)
         Graph.compute(placeholderMap, i);
 
-        Tensor expected = new Tensor.Builder(3).setValues(260, 704, 2320).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3).setValues(260, 704, 2320).build();
         assertThat(Results.getOutput(i)).isEqualTo(expected);
     }
 
@@ -153,16 +152,16 @@ class GraphTest {
      */
     @Test
     void multiplyBroadcastGradientsTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
-        Constant b = new Constant(new Tensor.Builder(1, 3).setValues(3, 2, 1).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(3, 8, 2, 5, 1, 6).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(1, 3).setValues(3, 2, 1).build());
 
         Multiplication c = new Multiplication(a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(3, 2, 1, 3, 2, 1).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(1, 3).setValues(8, 9, 8).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(2, 3).setValues(3, 2, 1, 3, 2, 1).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(1, 3).setValues(8, 9, 8).build());
     }
 
     /**
@@ -170,17 +169,17 @@ class GraphTest {
      */
     @Test
     void separateTreeTest() {
-        Constant a = new Constant(new Tensor.Builder(3).setValues(3, 2, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3).setValues(1, 2, 1).build());
-        Constant c = new Constant(new Tensor.Builder(3).setValues(1, 3, 2).build());
-        Constant d = new Constant(new Tensor.Builder(3).setValues(1, 2, 3).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(3).setValues(3, 2, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3).setValues(1, 2, 1).build());
+        Constant c = new Constant(new Tensor.Builder().setDimensions(3).setValues(1, 3, 2).build());
+        Constant d = new Constant(new Tensor.Builder().setDimensions(3).setValues(1, 2, 3).build());
 
         Addition e = new Addition(a, b);
         Addition f = new Addition(c, d);
 
         Graph.compute(new HashMap<>(), e, f);
-        assertThat(Results.getOutput(e)).isEqualTo(new Tensor.Builder(3).setValues(4, 4, 2).build());
-        assertThat(Results.getOutput(f)).isEqualTo(new Tensor.Builder(3).setValues(2, 5, 5).build());
+        assertThat(Results.getOutput(e)).isEqualTo(new Tensor.Builder().setDimensions(3).setValues(4, 4, 2).build());
+        assertThat(Results.getOutput(f)).isEqualTo(new Tensor.Builder().setDimensions(3).setValues(2, 5, 5).build());
     }
 
     /**

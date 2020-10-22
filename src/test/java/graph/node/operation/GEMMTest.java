@@ -44,28 +44,28 @@ class GEMMTest {
      */
     @Test
     void gemmTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
 
         GEMM c = new GEMM(false, false, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
 
-        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
+        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder().setDimensions(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
     }
 
     @Test
     void dimensionsTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
 
         GEMM c = new GEMM(true, false, a, b);
         GEMM d = new GEMM(false, true, a, b);
         GEMM e = new GEMM(true, true, a, b);
 
-        assertThrows(NodeComputationException.class, () -> Graph.compute(null, c));
-        assertThrows(NodeComputationException.class, () -> Graph.compute(null, d));
-        assertThrows(NodeComputationException.class, () -> Graph.compute(null, e));
+        assertThrows(NodeComputationException.class, () -> Graph.compute(c));
+        assertThrows(NodeComputationException.class, () -> Graph.compute(d));
+        assertThrows(NodeComputationException.class, () -> Graph.compute(e));
     }
 
     /**
@@ -73,14 +73,14 @@ class GEMMTest {
      */
     @Test
     void gemmTranposeTestA() {
-        Constant a = new Constant(new Tensor.Builder(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
 
         GEMM c = new GEMM(true, false, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
 
-        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
+        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder().setDimensions(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
     }
 
     /**
@@ -88,14 +88,14 @@ class GEMMTest {
      */
     @Test
     void gemmTranposeTestB() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
 
         GEMM c = new GEMM(false, true, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
 
-        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
+        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder().setDimensions(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
     }
 
     /**
@@ -103,14 +103,14 @@ class GEMMTest {
      */
     @Test
     void gemmTranposeTestAB() {
-        Constant a = new Constant(new Tensor.Builder(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
-        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
 
         GEMM c = new GEMM(true, true, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
 
-        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
+        assertThat(Results.getOutput(c)).isEqualTo(new Tensor.Builder().setDimensions(2, 4).setValues(5, 27, -2, 12, -1, 6, 0, 6).build());
     }
 
     /**
@@ -118,16 +118,16 @@ class GEMMTest {
      */
     @Test
     void gemmGradientTest() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
 
         GEMM c = new GEMM(false, false, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
     }
 
     /**
@@ -135,16 +135,16 @@ class GEMMTest {
      */
     @Test
     void gemmGradientTransposeTestA() {
-        Constant a = new Constant(new Tensor.Builder(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
-        Constant b = new Constant(new Tensor.Builder(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(3, 4).setValues(6, 3, -1, 0, 1, 1, 0, 4, -2, 5, 0, 2).build());
 
         GEMM c = new GEMM(true, false, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(3, 4).setValues(2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5).build());
     }
 
     /**
@@ -152,16 +152,16 @@ class GEMMTest {
      */
     @Test
     void gemmGradientTransposeTestB() {
-        Constant a = new Constant(new Tensor.Builder(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
-        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(2, 3).setValues(2, 1, 4, 0, 1, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
 
         GEMM c = new GEMM(false, true, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(2, 3).setValues(8, 6, 5, 8, 6, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
     }
 
     /**
@@ -169,16 +169,16 @@ class GEMMTest {
      */
     @Test
     void gemmGradientTransposeTestAB() {
-        Constant a = new Constant(new Tensor.Builder(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
-        Constant b = new Constant(new Tensor.Builder(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
+        Constant a = new Constant(new Tensor.Builder().setDimensions(3, 2).setValues(2, 0, 1, 1, 4, 1).build());
+        Constant b = new Constant(new Tensor.Builder().setDimensions(4, 3).setValues(6, 1, -2, 3, 1, 5, -1, 0, 0, 0, 4, 2).build());
 
         GEMM c = new GEMM(true, true, a, b);
 
-        Graph.compute(null, c);
+        Graph.compute(c);
         Graph.gradient();
 
-        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
-        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
+        assertThat(Results.getGradient(a)).isEqualTo(new Tensor.Builder().setDimensions(3, 2).setValues(8, 8, 6, 6, 5, 5).build());
+        assertThat(Results.getGradient(b)).isEqualTo(new Tensor.Builder().setDimensions(4, 3).setValues(2, 2, 5, 2, 2, 5, 2, 2, 5, 2, 2, 5).build());
     }
 
     /**

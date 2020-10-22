@@ -34,61 +34,61 @@ class OperationsTest {
 
     @Test
     void addition() {
-        Tensor t1 = new Tensor.Builder(1, 2).setValues(0, 1).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(1, 2).setValues(0, 1).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
 
-        Tensor expected = new Tensor.Builder(3, 2).setValues(2, 4, 4, 6, 6, 8).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3, 2).setValues(2, 4, 4, 6, 6, 8).build();
 
         Assertions.assertThat(Operations.addition(t1, t2)).isEqualTo(expected);
     }
 
     @Test
     void multiplication() {
-        Tensor t1 = new Tensor.Builder(1, 2).setValues(0, 1).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(1, 2).setValues(0, 1).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(2, 3, 4, 5, 6, 7).build();
 
-        Tensor expected = new Tensor.Builder(3, 2).setValues(0, 3, 0, 5, 0, 7).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3, 2).setValues(0, 3, 0, 5, 0, 7).build();
 
         assertThat(Operations.multiplication(t1, t2)).isEqualTo(expected);
     }
 
     @Test
     void division() {
-        Tensor t1 = new Tensor.Builder(2).setValues(0, 1).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 5, 3, 10, 6, 2).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(2).setValues(0, 1).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(2, 5, 3, 10, 6, 2).build();
 
-        Tensor expected = new Tensor.Builder(3, 2).setValues(0, 0.2f, 0, 0.1f, 0, 0.5f).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3, 2).setValues(0, 0.2f, 0, 0.1f, 0, 0.5f).build();
 
         assertThat(Operations.division(t1, t2)).isEqualTo(expected);
     }
 
     @Test
     void subtraction() {
-        Tensor t1 = new Tensor.Builder(2).setValues(5, 2).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(2, 9, 8, 5, 2, 1).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(2).setValues(5, 2).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(2, 9, 8, 5, 2, 1).build();
 
         // 5 2     2 9
         // 5 2     8 5
         // 5 2     2 1
-        Tensor expected = new Tensor.Builder(3, 2).setValues(3, -7, -3, -3, 3, 1).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3, 2).setValues(3, -7, -3, -3, 3, 1).build();
 
         assertThat(Operations.subtraction(t1, t2)).isEqualTo(expected);
     }
 
     @Test
     void sum() {
-        Tensor t1 = new Tensor.Builder(2, 2, 3).setValues(9, 7, 5, 5, 3, 5, 1, 3, 5, 2, 6, 9).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(2, 2, 3).setValues(9, 7, 5, 5, 3, 5, 1, 3, 5, 2, 6, 9).build();
 
-        Tensor expected = new Tensor.Builder(2, 1).setValues(30, 30).build();
+        Tensor expected = new Tensor.Builder().setDimensions(2, 1).setValues(30, 30).build();
 
         assertThat(Operations.sum(t1, 0, 2)).isEqualTo(expected);
     }
 
     @Test
     void sumVector() {
-        Tensor t1 = new Tensor.Builder(2, 3).setValues(2, 7, 2, 8, 1, 9).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(2, 3).setValues(2, 7, 2, 8, 1, 9).build();
 
-        Tensor expected = new Tensor.Builder(1, 3).setValues(10, 8, 11).build();
+        Tensor expected = new Tensor.Builder().setDimensions(1, 3).setValues(10, 8, 11).build();
 
         assertThat(Operations.sum(t1, 0)).isEqualTo(expected);
     }

@@ -86,6 +86,17 @@ public class Graph {
     }
 
     /**
+     * Computes the specified nodes. Sorts the graph topologically, then based on the distance of nodes to the output
+     * nodes in order to allow for the graph to be computed efficiently.
+     *
+     * @param outputNodes    the nodes to compute
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static void compute(Node... outputNodes) {
+        compute(null, outputNodes);
+    }
+
+    /**
      * Computes the specified nodes, provided the proper placeholders have been inputted. Sorts the
      * graph topologically, then based on the distance of nodes to the output nodes in order to
      * allow for the graph to be computed efficiently.

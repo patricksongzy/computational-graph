@@ -238,7 +238,7 @@ public class Tensor {
      * @return the tensor filled with ones
      */
     public static Tensor ones(int... dimensions) {
-        Tensor ones = new Tensor.Builder(dimensions).build();
+        Tensor ones = new Tensor.Builder().setDimensions(dimensions).build();
         ones.fill(1);
 
         return ones;
@@ -299,7 +299,7 @@ public class Tensor {
      * @return the tensor filled with zeros
      */
     public static Tensor zeros(int... dimensions) {
-        return new Tensor.Builder(dimensions).build();
+        return new Tensor.Builder().setDimensions(dimensions).build();
     }
 
     /**
@@ -596,36 +596,25 @@ public class Tensor {
      * The Builder builds a tensor, given its dimensions and values.
      */
     public static class Builder {
-
-        private final int[] dimensions;
-        private final int length;
+        private int[] dimensions;
+        private int length;
         private float[] values;
 
         /**
-         * Constructs the builder, setting the dimensions for the tensor and calculates its length.
+         * Sets the dimensions for the tensor and calculates its length.
          *
          * @param dimensions the row-major dimensions of the tensor
+         *
+         * @return this builder
          */
-        public Builder(int... dimensions) {
+        public Builder setDimensions(int... dimensions) {
             if (dimensions.length == 0)
                 throw new IllegalArgumentException("Cannot have tensor with no dimensions.");
 
             this.dimensions = dimensions;
             this.length = Arrays.stream(dimensions).reduce(1, (a, b) -> a * b);
-        }
 
-        /**
-         * Builds the tensor from the supplied dimensions and values. If no values are supplied, the
-         * tensor is filled with zeros.
-         *
-         * @return the tensor
-         */
-        public Tensor build() {
-            if (values == null) {
-                this.values = new float[length];
-            }
-
-            return new Tensor(this);
+            return this;
         }
 
         /**
@@ -643,6 +632,24 @@ public class Tensor {
             this.values = values;
 
             return this;
+        }
+
+        /**
+         * Builds the tensor from the supplied dimensions and values. If no values are supplied, the
+         * tensor is filled with zeros.
+         *
+         * @return the tensor
+         */
+        public Tensor build() {
+            if (dimensions == null) {
+                throw new IllegalArgumentException("Dimensions have not been specified.");
+            }
+
+            if (values == null) {
+                this.values = new float[length];
+            }
+
+            return new Tensor(this);
         }
     }
 }

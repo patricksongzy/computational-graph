@@ -52,20 +52,21 @@ class TensorTest {
 
         Tensor[] results = Tensor.broadcast(t1, t2);
         Tensor[] expected = new Tensor[2];
-        expected[0] =
-                new Tensor.Builder(4, 3, 2).setValues(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11).build();
-        expected[1] = new Tensor.Builder(4, 3, 2).setValues(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1).build();
+        expected[0] = new Tensor.Builder().setDimensions(4, 3, 2)
+                .setValues(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11).build();
+        expected[1] = new Tensor.Builder().setDimensions(4, 3, 2)
+                .setValues(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1).build();
 
         assertThat(results).isEqualTo(expected);
     }
 
     @Test
     void unbroadcast() {
-        Tensor t1 = new Tensor.Builder(3, 1, 2).setValues(1, 2, 2, 3, 3, 4).build();
-        Tensor t2 = new Tensor.Builder(3, 3, 1).setValues(1, 2, 3, 5, 2, 3, 8, 7, 9).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(3, 1, 2).setValues(1, 2, 2, 3, 3, 4).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 3, 1).setValues(1, 2, 3, 5, 2, 3, 8, 7, 9).build();
 
         Tensor t1Broadcast = Tensor.broadcast(t1, t2)[0];
-        Tensor expected = new Tensor.Builder(3, 1, 2).setValues(3, 6, 6, 9, 9, 12).build();
+        Tensor expected = new Tensor.Builder().setDimensions(3, 1, 2).setValues(3, 6, 6, 9, 9, 12).build();
 
         assertThat(Tensor.unbroadcast(t1Broadcast, t1.getDimensions())).isEqualTo(expected);
     }
@@ -104,9 +105,9 @@ class TensorTest {
         Tensor[] expected = new Tensor[3];
 
         expected[0] =
-                new Tensor.Builder(4, 3, 2).setValues(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11).build();
-        expected[1] = new Tensor.Builder(4, 3, 2).setValues(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1).build();
-        expected[2] = new Tensor.Builder(4, 3, 2).setValues(0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5).build();
+                new Tensor.Builder().setDimensions(4, 3, 2).setValues(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11).build();
+        expected[1] = new Tensor.Builder().setDimensions(4, 3, 2).setValues(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1).build();
+        expected[2] = new Tensor.Builder().setDimensions(4, 3, 2).setValues(0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5).build();
 
         assertThat(results).isEqualTo(expected);
     }
@@ -195,10 +196,10 @@ class TensorTest {
 
     @Test
     void equalsTest() {
-        Tensor t1 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t3 = new Tensor.Builder(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t4 = new Tensor.Builder(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t3 = new Tensor.Builder().setDimensions(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t4 = new Tensor.Builder().setDimensions(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
 
         assertThat(t1.equals(t2)).isEqualTo(true);
         assertThat(t1.equals(t3)).isEqualTo(false);
@@ -208,10 +209,10 @@ class TensorTest {
 
     @Test
     void hashCodeTest() {
-        Tensor t1 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t2 = new Tensor.Builder(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t3 = new Tensor.Builder(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
-        Tensor t4 = new Tensor.Builder(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
+        Tensor t1 = new Tensor.Builder().setDimensions(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t2 = new Tensor.Builder().setDimensions(3, 2).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t3 = new Tensor.Builder().setDimensions(2, 3).setValues(0, 5, 8, 2, 9, 6).build();
+        Tensor t4 = new Tensor.Builder().setDimensions(3, 2).setValues(1, 5, 8, 2, 9, 6).build();
 
         Set<Integer> codes = new HashSet<>();
         codes.add(t1.hashCode());

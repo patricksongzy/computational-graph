@@ -56,7 +56,7 @@ public class Constant extends Node {
     public Constant(float value) {
         super();
 
-        this.values = new Tensor.Builder(1).setValues(value).build();
+        this.values = new Tensor.Builder().setDimensions(1).setValues(value).build();
     }
 
     /**
